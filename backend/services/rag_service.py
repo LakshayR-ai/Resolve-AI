@@ -45,3 +45,33 @@ def create_vector_database():
 
 
     return vector_db
+
+def get_relevant_context(question):
+
+
+    embeddings = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+
+
+    db = Chroma(
+        persist_directory="vector_store",
+        embedding_function=embeddings
+    )
+
+
+    results = db.similarity_search(
+        question,
+        k=2
+    )
+
+
+    context = ""
+
+
+    for document in results:
+
+        context += document.page_content
+
+
+    return context

@@ -1,7 +1,10 @@
-def generate_response(question):
+def generate_response(question, context):
 
-    response = (
-        "This response will come from LLM"
-    )
+    response = f"""
+Based on the available company information:
+
+{context}
+
+"""
 
     return response

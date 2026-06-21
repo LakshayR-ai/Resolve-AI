@@ -5,12 +5,19 @@ from services.rag_service import get_relevant_context
 from services.LLM_service import generate_response
 
 from database.database import engine, SessionLocal
-
 from database.models import Base, ChatHistory
+
+from services.analytics_service import (
+    classify_issue,
+    detect_sentiment
+)
+
 
 app = FastAPI()
 
+
 Base.metadata.create_all(bind=engine)
+
 
 
 class ChatRequest(BaseModel):
@@ -23,13 +30,13 @@ class ChatRequest(BaseModel):
 def home():
 
     return {
-        "status":"running"
+        "status": "running"
     }
 
 
 
 @app.post("/chat")
-def chat(request:ChatRequest):
+def chat(request: ChatRequest):
 
 
     context = get_relevant_context(
@@ -43,6 +50,16 @@ def chat(request:ChatRequest):
     )
 
 
+    category = classify_issue(
+        request.query
+    )
+
+
+    sentiment = detect_sentiment(
+        request.query
+    )
+
+
     db = SessionLocal()
 
 
@@ -50,7 +67,11 @@ def chat(request:ChatRequest):
 
         question=request.query,
 
-        answer=answer
+        answer=answer,
+
+        category=category,
+
+        sentiment=sentiment
 
     )
 
@@ -66,8 +87,56 @@ def chat(request:ChatRequest):
 
     return {
 
-        "question":request.query,
+        "question": request.query,
 
-        "answer":answer
+        "answer": answer,
+
+        "category": category,
+
+        "sentiment": sentiment
+
+    }
+
+
+
+@app.get("/analytics")
+def analytics():
+
+
+    db = SessionLocal()
+
+
+    chats = db.query(
+        ChatHistory
+    ).all()
+
+
+    total = len(chats)
+
+
+    categories = {}
+
+
+    for chat in chats:
+
+
+        if chat.category in categories:
+
+            categories[chat.category] += 1
+
+
+        else:
+
+            categories[chat.category] = 1
+
+
+    db.close()
+
+
+    return {
+
+        "total_chats": total,
+
+        "categories": categories
 
     }

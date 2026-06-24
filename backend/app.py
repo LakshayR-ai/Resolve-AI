@@ -140,3 +140,53 @@ def analytics():
         "categories": categories
 
     }
+
+@app.get("/history")
+def get_chat_history():
+
+
+    db = SessionLocal()
+
+
+    chats = db.query(
+        ChatHistory
+    ).all()
+
+
+    history = []
+
+
+    for chat in chats:
+
+
+        history.append(
+
+            {
+
+                "id": chat.id,
+
+                "question": chat.question,
+
+                "answer": chat.answer,
+
+                "category": chat.category,
+
+                "sentiment": chat.sentiment,
+
+                "created_at": chat.created_at
+
+            }
+
+        )
+
+
+    db.close()
+
+
+    return {
+
+        "total_records": len(history),
+
+        "history": history
+
+    }

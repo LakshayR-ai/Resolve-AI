@@ -19,7 +19,7 @@ client = genai.Client(
 
 
 
-def generate_response(question, context):
+def generate_response(question, context, history):
 
 
     prompt = f"""

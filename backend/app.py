@@ -6,6 +6,7 @@ from services.LLM_service import generate_response
 
 from database.database import engine, SessionLocal
 from database.models import Base, ChatHistory
+from services.history_service import get_recent_history
 
 from services.analytics_service import (
     classify_issue,
@@ -44,9 +45,16 @@ def chat(request: ChatRequest):
     )
 
 
+    history = get_recent_history()
+
     answer = generate_response(
-        request.query,
-        context
+
+      request.query,
+
+      context,
+
+      history
+
     )
 
 

@@ -31,7 +31,10 @@ class ChatRequest(BaseModel):
 def home():
 
     return {
-        "status": "running"
+        "application": "Resolve AI",
+        "status": "running",
+        "version": "1.0.0",
+        "documentation": "/docs"
     }
 
 
@@ -197,4 +200,13 @@ def get_chat_history():
 
         "history": history
 
+    }
+
+@app.get("/health")
+def health_check():
+
+    return {
+        "status": "healthy",
+        "service": "Resolve AI",
+        "version": "1.0.0"
     }

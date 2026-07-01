@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    container_name: resolve-ai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./resolve_ai.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:80
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/vector_stores:/app/vector_stores
+      - ./backend/logs:/app/logs
+      - ./backend/resolve_ai.db:/app/resolve_ai.db
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: resolve-ai-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

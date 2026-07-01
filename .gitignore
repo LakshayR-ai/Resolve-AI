@@ -1,7 +1,33 @@
-venv/
-
+# Python
 __pycache__/
-
+*.py[cod]
+*.pyo
 .env
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
 
-*.pyc
+# Database
+*.db
+*.sqlite3
+
+# Uploads & Vector stores (large binary data)
+backend/uploads/
+backend/vector_stores/
+backend/logs/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

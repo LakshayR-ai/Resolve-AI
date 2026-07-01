@@ -1,212 +1,83 @@
+import logging
+import os
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from contextlib import asynccontextmanager
 
-from services.rag_service import get_relevant_context
-from services.LLM_service import generate_response
+from core.config import settings
+from database.database import engine
+from database.models import Base
 
-from database.database import engine, SessionLocal
-from database.models import Base, ChatHistory
-from services.history_service import get_recent_history
+# Import routes
+from routes.auth import router as auth_router
+from routes.chat import router as chat_router
+from routes.documents import router as documents_router
+from routes.analytics import router as analytics_router
+from routes.admin import router as admin_router
 
-from services.analytics_service import (
-    classify_issue,
-    detect_sentiment
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("logs/app.log") if os.path.exists("logs") or not os.makedirs("logs", exist_ok=True) else logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info(f"Starting {settings.APP_NAME} v{settings.VERSION}")
+    Base.metadata.create_all(bind=engine)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    os.makedirs(settings.VECTOR_STORE_DIR, exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+    logger.info("Database tables created")
+    yield
+    # Shutdown
+    logger.info("Shutting down...")
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="Multi-tenant AI Customer Support SaaS Platform",
+    version=settings.VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app = FastAPI()
-
-
-Base.metadata.create_all(bind=engine)
-
-
-
-class ChatRequest(BaseModel):
-
-    query: str
-
+# Routers
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(chat_router, prefix="/api/v1")
+app.include_router(documents_router, prefix="/api/v1")
+app.include_router(analytics_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
 
 
 @app.get("/")
-def home():
-
+def root():
     return {
-        "application": "Resolve AI",
+        "application": settings.APP_NAME,
+        "version": settings.VERSION,
         "status": "running",
-        "version": "1.0.0",
-        "documentation": "/docs"
+        "docs": "/docs",
     }
 
-
-
-@app.post("/chat")
-def chat(request: ChatRequest):
-
-
-    context = get_relevant_context(
-        request.query
-    )
-
-
-    history = get_recent_history()
-
-    answer = generate_response(
-
-      request.query,
-
-      context,
-
-      history
-
-    )
-
-
-    category = classify_issue(
-        request.query
-    )
-
-
-    sentiment = detect_sentiment(
-        request.query
-    )
-
-
-    db = SessionLocal()
-
-
-    chat_record = ChatHistory(
-
-        question=request.query,
-
-        answer=answer,
-
-        category=category,
-
-        sentiment=sentiment
-
-    )
-
-
-    db.add(chat_record)
-
-
-    db.commit()
-
-
-    db.close()
-
-
-    return {
-
-        "question": request.query,
-
-        "answer": answer,
-
-        "category": category,
-
-        "sentiment": sentiment
-
-    }
-
-
-
-@app.get("/analytics")
-def analytics():
-
-
-    db = SessionLocal()
-
-
-    chats = db.query(
-        ChatHistory
-    ).all()
-
-
-    total = len(chats)
-
-
-    categories = {}
-
-
-    for chat in chats:
-
-
-        if chat.category in categories:
-
-            categories[chat.category] += 1
-
-
-        else:
-
-            categories[chat.category] = 1
-
-
-    db.close()
-
-
-    return {
-
-        "total_chats": total,
-
-        "categories": categories
-
-    }
-
-@app.get("/history")
-def get_chat_history():
-
-
-    db = SessionLocal()
-
-
-    chats = db.query(
-        ChatHistory
-    ).all()
-
-
-    history = []
-
-
-    for chat in chats:
-
-
-        history.append(
-
-            {
-
-                "id": chat.id,
-
-                "question": chat.question,
-
-                "answer": chat.answer,
-
-                "category": chat.category,
-
-                "sentiment": chat.sentiment,
-
-                "created_at": chat.created_at
-
-            }
-
-        )
-
-
-    db.close()
-
-
-    return {
-
-        "total_records": len(history),
-
-        "history": history
-
-    }
 
 @app.get("/health")
-def health_check():
-
-    return {
-        "status": "healthy",
-        "service": "Resolve AI",
-        "version": "1.0.0"
-    }
+def health():
+    return {"status": "healthy", "service": settings.APP_NAME, "version": settings.VERSION}

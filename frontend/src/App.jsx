@@ -11,6 +11,8 @@ import Documents from './pages/Documents'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 import Admin from './pages/Admin'
+import History from './pages/History'
+import PublicChat from './pages/PublicChat'
 
 export default function App() {
   return (
@@ -21,18 +23,20 @@ export default function App() {
             position="top-right"
             toastOptions={{
               duration: 3500,
-              style: {
-                borderRadius: '12px',
-                fontSize: '14px',
-              },
+              style: { borderRadius: '12px', fontSize: '14px' },
             }}
           />
           <Routes>
+            {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/chat/:slug" element={<PublicChat />} />
+
+            {/* Protected routes */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

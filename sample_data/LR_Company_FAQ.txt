@@ -1,0 +1,110 @@
+LR Company - Frequently Asked Questions (FAQ)
+==============================================
+
+ABOUT US
+--------
+Q: What is LR Company?
+A: LR Company is a technology solutions provider specializing in software development, cloud services, and AI-powered business tools. We help businesses automate workflows and scale their operations efficiently.
+
+Q: Where is LR Company located?
+A: LR Company is headquartered in New Delhi, India, with remote teams across the globe. We serve clients worldwide.
+
+Q: How can I contact LR Company?
+A: You can reach us via email at support@lrcompany.com, by phone at +91-98765-43210, or through our live chat on the website. Our support hours are Monday to Friday, 9 AM to 6 PM IST.
+
+
+PRODUCTS & SERVICES
+-------------------
+Q: What products does LR Company offer?
+A: We offer the following products:
+- Resolve AI: An AI-powered customer support chatbot platform
+- LR Analytics: Business intelligence and data analytics dashboard
+- LR Cloud: Managed cloud hosting and infrastructure services
+- LR Dev Suite: A complete toolkit for software development teams
+
+Q: What is Resolve AI?
+A: Resolve AI is our flagship AI customer support platform. It allows companies to upload their documents, FAQs, and manuals, and instantly deploy an AI chatbot that answers customer questions using only that company's knowledge base.
+
+Q: Do you offer a free trial?
+A: Yes! We offer a 14-day free trial for all our products with no credit card required. You get full access to all features during the trial period.
+
+Q: What industries do you serve?
+A: We serve clients across e-commerce, healthcare, education, finance, retail, logistics, and technology sectors.
+
+
+PRICING & BILLING
+-----------------
+Q: How much does Resolve AI cost?
+A: Resolve AI is available in three plans:
+- Starter: $29/month — Up to 1,000 chats/month, 5 documents
+- Growth: $79/month — Up to 10,000 chats/month, 50 documents
+- Enterprise: Custom pricing — Unlimited chats and documents
+
+Q: Can I upgrade or downgrade my plan?
+A: Yes, you can change your plan at any time from your account dashboard. Changes take effect at the start of the next billing cycle.
+
+Q: What payment methods do you accept?
+A: We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for annual plans.
+
+Q: Do you offer refunds?
+A: Yes, we offer a 30-day money-back guarantee. If you are not satisfied within 30 days of purchase, contact us at billing@lrcompany.com for a full refund.
+
+Q: How do I cancel my subscription?
+A: You can cancel your subscription anytime from Settings > Billing in your dashboard. Your account remains active until the end of the current billing period.
+
+
+TECHNICAL SUPPORT
+-----------------
+Q: How do I reset my password?
+A: Click "Forgot Password" on the login page, enter your email address, and we'll send you a reset link within 2 minutes. Check your spam folder if you don't see it.
+
+Q: The chatbot is not responding. What should I do?
+A: First, check your internet connection. Then try refreshing the page. If the issue persists, clear your browser cache or try a different browser. Contact support@lrcompany.com if the problem continues.
+
+Q: How do I upload documents to Resolve AI?
+A: Log in to your dashboard, go to Knowledge Base, and click Upload. You can upload PDF, TXT, DOCX, and MD files up to 50MB each. The system automatically processes and indexes your documents within a few minutes.
+
+Q: What file formats are supported?
+A: Resolve AI supports PDF, TXT, DOCX, DOC, and Markdown (.md) files.
+
+Q: How long does document processing take?
+A: Most documents are processed and ready within 1-3 minutes depending on file size. You'll see the status change from "Processing" to "Ready" in your Knowledge Base.
+
+Q: Is my data secure?
+A: Yes. All data is encrypted in transit (TLS 1.3) and at rest (AES-256). Each company's data is completely isolated — your knowledge base is never shared with or accessible by other companies.
+
+
+ACCOUNT & SETTINGS
+------------------
+Q: How do I add team members to my workspace?
+A: Go to Settings > Team, click Invite Member, and enter their email address. They'll receive an invitation to join your workspace.
+
+Q: Can multiple agents use the same account?
+A: Yes, on the Growth and Enterprise plans you can add unlimited team members who can all manage the chatbot and view analytics.
+
+Q: How do I change my company name?
+A: Go to Settings > Workspace and update your company name there. Note that the workspace slug (URL) cannot be changed after creation.
+
+Q: Can I customize the chatbot's appearance?
+A: Yes, on the Growth and Enterprise plans you can customize the chatbot's name, avatar, color theme, and welcome message from Settings > Chatbot Customization.
+
+
+SHIPPING & DELIVERY (for physical product orders)
+--------------------------------------------------
+Q: Do you ship physical products?
+A: Our software products are delivered digitally. However, for enterprise clients who require hardware (servers, devices), we partner with certified vendors for delivery across India and internationally.
+
+Q: How long does delivery take for hardware orders?
+A: Hardware deliveries within India take 5-7 business days. International deliveries take 10-15 business days.
+
+Q: How do I track my order?
+A: Once your order is dispatched, you'll receive a tracking number via email. You can track your shipment at our logistics partner's website or by contacting support@lrcompany.com.
+
+
+RETURNS & CANCELLATIONS
+------------------------
+Q: How do I cancel a hardware order?
+A: Hardware orders can be cancelled within 24 hours of placement by contacting support@lrcompany.com. After 24 hours, orders that have been dispatched cannot be cancelled.
+
+Q: What is your return policy for hardware?
+A: We accept returns within 14 days of delivery for defective or damaged items. The product must be in its original packaging. Contact support@lrcompany.com to initiate a return.

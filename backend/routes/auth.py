@@ -1,3 +1,5 @@
+from typing import Optional
+from pydantic import BaseModel
 import re
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -93,3 +95,23 @@ def get_me(
     current_user: models.User = Depends(__import__("core.dependencies", fromlist=["get_current_user"]).get_current_user)
 ):
     return current_user
+
+
+class UserUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
+
+
+@router.patch("/me")
+def update_me(
+    request: UserUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(__import__("core.dependencies", fromlist=["get_current_user"]).get_current_user)
+):
+    if request.full_name:
+        current_user.full_name = request.full_name
+    db.commit()
+    db.refresh(current_user)
+    return {"message": "Profile updated", "full_name": current_user.full_name}

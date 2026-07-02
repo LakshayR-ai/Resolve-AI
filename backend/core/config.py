@@ -26,7 +26,7 @@ class Settings:
     # File uploads
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")
     MAX_FILE_SIZE_MB: int = int(os.getenv("MAX_FILE_SIZE_MB", "50"))
-    ALLOWED_EXTENSIONS: list = ["pdf", "txt", "docx", "doc", "md"]
+    ALLOWED_EXTENSIONS: list = ["pdf", "txt", "docx", "doc", "md", "csv", "xlsx", "xls"]
 
     # Vector store
     VECTOR_STORE_DIR: str = os.getenv("VECTOR_STORE_DIR", "vector_stores")

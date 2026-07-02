@@ -15,6 +15,8 @@ from routes.chat import router as chat_router
 from routes.documents import router as documents_router
 from routes.analytics import router as analytics_router
 from routes.admin import router as admin_router
+from routes.company import router as company_router
+from routes.widget import router as widget_router
 
 # Configure logging
 logging.basicConfig(
@@ -66,6 +68,8 @@ app.include_router(chat_router, prefix="/api/v1")
 app.include_router(documents_router, prefix="/api/v1")
 app.include_router(analytics_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
+app.include_router(company_router, prefix="/api/v1")
+app.include_router(widget_router, prefix="/api/v1")
 
 
 @app.get("/")

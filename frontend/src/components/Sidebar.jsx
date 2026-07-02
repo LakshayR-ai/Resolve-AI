@@ -3,13 +3,14 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import {
   LayoutDashboard, MessageSquare, FileText, BarChart3,
-  Settings, LogOut, Sun, Moon, Bot, Shield
+  Settings, LogOut, Sun, Moon, Bot, Shield, History
 } from 'lucide-react'
 import clsx from 'clsx'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/chat', label: 'Chat', icon: MessageSquare },
+  { to: '/chat', label: 'Live Chat', icon: MessageSquare },
+  { to: '/history', label: 'Chat History', icon: History },
   { to: '/documents', label: 'Knowledge Base', icon: FileText },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/settings', label: 'Settings', icon: Settings },

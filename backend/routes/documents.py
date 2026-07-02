@@ -145,3 +145,40 @@ def get_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
+
+
+@router.post("/{doc_id}/reindex", response_model=DocumentResponse)
+def reindex_document(
+    doc_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Delete existing embeddings and re-process the document from scratch."""
+    doc = db.query(models.Document).filter(
+        models.Document.id == doc_id,
+        models.Document.company_id == current_user.company_id,
+    ).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    upload_dir = get_upload_dir(current_user.company_id)
+    file_path = os.path.join(upload_dir, doc.filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Source file no longer exists")
+
+    # Remove existing embeddings
+    delete_document_from_store(current_user.company_id, doc_id)
+
+    # Mark as processing
+    doc.status = "processing"
+    doc.chunk_count = 0
+    db.commit()
+    db.refresh(doc)
+
+    # Re-embed in background
+    background_tasks.add_task(
+        process_and_embed,
+        file_path, doc.file_type, doc.id, current_user.company_id, settings.DATABASE_URL
+    )
+    return doc

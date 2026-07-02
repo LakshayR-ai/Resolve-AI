@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List
 
 
 class AnalyticsSummary(BaseModel):
@@ -7,9 +7,14 @@ class AnalyticsSummary(BaseModel):
     total_sessions: int
     total_users: int
     total_documents: int
+    today_chats: int
+    monthly_chats: int
     avg_response_time_ms: float
     helpful_feedback_pct: float
     not_helpful_feedback_pct: float
+    positive_pct: float
+    negative_pct: float
+    knowledge_coverage: float
 
 
 class CategoryBreakdown(BaseModel):
@@ -46,6 +51,7 @@ class AnalyticsResponse(BaseModel):
     daily_stats: List[DailyStats]
     weekly_stats: List[DailyStats]
     monthly_stats: List[DailyStats]
+    hourly_stats: List[DailyStats]
     top_questions: List[TopQuestion]
     top_failed_queries: List[FailedQuery]
     feedback_rating: float

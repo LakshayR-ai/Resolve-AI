@@ -1,69 +1,95 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
 import Layout from '../components/Layout'
 import {
   Upload, Trash2, FileText, CheckCircle, AlertCircle,
-  Loader2, RefreshCw, RotateCcw, Search, X
+  Loader2, RefreshCw, RotateCcw, Search, X,
+  Database
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
-const STATUS_STYLES = {
-  ready:      'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400',
-  processing: 'bg-amber-50  dark:bg-amber-950  text-amber-600  dark:text-amber-400',
-  failed:     'bg-red-50    dark:bg-red-950    text-red-600    dark:text-red-400',
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } }
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }
+
+const FILE_CONFIG = {
+  pdf:  { bg: 'rgba(239,68,68,0.08)',  color: '#EF4444', label: 'PDF' },
+  docx: { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', label: 'DOCX' },
+  doc:  { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', label: 'DOC' },
+  txt:  { bg: 'rgba(107,114,128,0.08)',color: '#6B7280', label: 'TXT' },
+  md:   { bg: 'rgba(124,58,237,0.08)', color: '#7C3AED', label: 'MD' },
+  csv:  { bg: 'rgba(16,185,129,0.08)', color: '#10B981', label: 'CSV' },
+  xlsx: { bg: 'rgba(5,150,105,0.08)',  color: '#059669', label: 'XLSX' },
+  xls:  { bg: 'rgba(5,150,105,0.08)',  color: '#059669', label: 'XLS' },
 }
 
-const TYPE_COLORS = {
-  pdf:  'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300',
-  docx: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300',
-  doc:  'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300',
-  txt:  'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300',
-  md:   'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300',
-  csv:  'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300',
-  xlsx: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300',
-  xls:  'bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300',
+const STATUS_CONFIG = {
+  ready:      { bg: 'rgba(16,185,129,0.08)',  color: '#10B981', label: 'Ready' },
+  processing: { bg: 'rgba(245,158,11,0.08)',  color: '#F59E0B', label: 'Processing' },
+  failed:     { bg: 'rgba(239,68,68,0.08)',   color: '#EF4444', label: 'Failed' },
 }
 
-function DocRow({ doc, onDelete, onReindex }) {
-  const StatusIcon = doc.status === 'ready' ? CheckCircle : doc.status === 'processing' ? Loader2 : AlertCircle
+function DocCard({ doc, onDelete, onReindex }) {
+  const ft = FILE_CONFIG[doc.file_type] || FILE_CONFIG.txt
+  const st = STATUS_CONFIG[doc.status] || STATUS_CONFIG.processing
+
   return (
-    <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition group">
-      <div className="w-10 h-10 bg-violet-50 dark:bg-violet-950 rounded-lg flex items-center justify-center flex-shrink-0">
-        <FileText size={18} className="text-violet-600 dark:text-violet-400" />
+    <motion.div variants={item}
+      className="group p-4 rounded-2xl flex items-center gap-4 transition-all hover:shadow-sm"
+      style={{ background: 'white', border: '1px solid rgba(0,0,0,0.06)' }}
+      whileHover={{ y: -1, boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+
+      {/* File icon */}
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: ft.bg }}>
+        <FileText size={18} style={{ color: ft.color }} />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{doc.original_name}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+        <p className="text-sm font-semibold text-gray-900 truncate">{doc.original_name}</p>
+        <p className="text-xs text-gray-400 mt-0.5">
           {(doc.file_size / 1024).toFixed(1)} KB
           {doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
-          {' · '}{new Date(doc.created_at).toLocaleDateString()}
+          {' · '}{new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </p>
       </div>
 
-      <span className={clsx('badge', STATUS_STYLES[doc.status] || 'bg-gray-100 text-gray-600')}>
-        <StatusIcon size={11} className={clsx('mr-1', doc.status === 'processing' && 'animate-spin')} />
-        {doc.status}
+      {/* Status badge */}
+      <span className="px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 flex-shrink-0"
+        style={{ background: st.bg, color: st.color }}>
+        {doc.status === 'processing' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+        {doc.status === 'ready'      && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+        {doc.status === 'failed'     && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+        {st.label}
       </span>
 
-      <span className={clsx('badge uppercase text-[10px] font-bold', TYPE_COLORS[doc.file_type] || 'bg-gray-100 text-gray-600')}>
-        {doc.file_type}
+      {/* File type badge */}
+      <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase flex-shrink-0"
+        style={{ background: ft.bg, color: ft.color }}>
+        {ft.label}
       </span>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-        <button onClick={() => onReindex(doc.id)}
+      {/* Actions — show on hover */}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <motion.button onClick={() => onReindex(doc.id)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
           title="Rebuild embeddings"
-          className="p-2 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950 transition">
-          <RotateCcw size={15} />
-        </button>
-        <button onClick={() => onDelete(doc.id)}
-          title="Delete document"
-          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition">
-          <Trash2 size={15} />
-        </button>
+          className="p-2 rounded-lg transition-colors text-gray-400 hover:text-violet-600"
+          style={{ background: 'rgba(108,99,255,0)' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(108,99,255,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(108,99,255,0)'}>
+          <RotateCcw size={14} />
+        </motion.button>
+        <motion.button onClick={() => onDelete(doc.id)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+          title="Delete"
+          className="p-2 rounded-lg transition-colors text-gray-400 hover:text-red-500"
+          style={{ background: 'rgba(239,68,68,0)' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0)'}>
+          <Trash2 size={14} />
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -74,6 +100,7 @@ export default function Documents() {
   const [uploading, setUploading] = useState(false)
   const [dragging,  setDragging]  = useState(false)
   const [search,    setSearch]    = useState('')
+  const [progress,  setProgress]  = useState(0)
   const fileRef = useRef()
 
   const load = () => {
@@ -85,7 +112,6 @@ export default function Documents() {
   }
 
   useEffect(() => { load() }, [])
-
   useEffect(() => {
     if (!search.trim()) { setFiltered(docs); return }
     const q = search.toLowerCase()
@@ -94,44 +120,51 @@ export default function Documents() {
 
   const upload = async (files) => {
     const allowed = ['pdf', 'txt', 'docx', 'doc', 'md', 'csv', 'xlsx', 'xls']
-    for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop().toLowerCase()
-      if (!allowed.includes(ext)) { toast.error(`${file.name}: unsupported format`); continue }
-      if (file.size > 50 * 1024 * 1024) { toast.error(`${file.name}: exceeds 50MB limit`); continue }
+    const valid = Array.from(files).filter(f => {
+      const ext = f.name.split('.').pop().toLowerCase()
+      if (!allowed.includes(ext)) { toast.error(`${f.name}: unsupported format`); return false }
+      if (f.size > 50 * 1024 * 1024) { toast.error(`${f.name}: exceeds 50MB`); return false }
+      return true
+    })
+    if (!valid.length) return
 
-      setUploading(true)
+    setUploading(true)
+    let done = 0
+    for (const file of valid) {
       const fd = new FormData()
       fd.append('file', file)
       try {
         await api.post('/documents/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-        toast.success(`${file.name} uploaded — generating embeddings...`)
+        done++
+        setProgress(Math.round(done / valid.length * 100))
+        toast.success(`${file.name} uploaded`)
       } catch (err) {
-        toast.error(err.response?.data?.detail || `Failed to upload ${file.name}`)
-      } finally {
-        setUploading(false)
+        toast.error(err.response?.data?.detail || `Failed: ${file.name}`)
       }
     }
+    setUploading(false)
+    setProgress(0)
     load()
   }
 
   const deleteDoc = async (id) => {
-    if (!window.confirm('Delete this document? This also removes its embeddings from the knowledge base.')) return
+    if (!window.confirm('Delete document? This removes its embeddings from the knowledge base.')) return
     try {
       await api.delete(`/documents/${id}`)
       toast.success('Document deleted')
       setDocs(d => d.filter(doc => doc.id !== id))
-    } catch { toast.error('Failed to delete document') }
+    } catch { toast.error('Delete failed') }
   }
 
   const reindexDoc = async (id) => {
     try {
       await api.post(`/documents/${id}/reindex`)
-      toast.success('Re-indexing started — embeddings will be rebuilt shortly')
+      toast.success('Re-indexing started')
       setDocs(d => d.map(doc => doc.id === id ? { ...doc, status: 'processing', chunk_count: 0 } : doc))
-    } catch { toast.error('Failed to start re-indexing') }
+    } catch { toast.error('Re-index failed') }
   }
 
-  const onDrop = (e) => { e.preventDefault(); setDragging(false); upload(e.dataTransfer.files) }
+  const onDrop = e => { e.preventDefault(); setDragging(false); upload(e.dataTransfer.files) }
 
   const readyCount = docs.filter(d => d.status === 'ready').length
   const totalChunks = docs.reduce((s, d) => s + (d.chunk_count || 0), 0)
@@ -141,97 +174,130 @@ export default function Documents() {
       <div className="p-8 max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Knowledge Base</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Upload documents to power your AI assistant
-            </p>
+            <h1 className="text-2xl font-bold font-display text-gray-900 dark:text-white">Knowledge Base</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Your AI learns from these documents</p>
           </div>
-          <button onClick={load} className="btn-secondary flex items-center gap-2 text-sm">
-            <RefreshCw size={15} /> Refresh
+          <button onClick={load} className="btn-ghost text-sm flex items-center gap-1.5">
+            <RefreshCw size={14} /> Refresh
           </button>
-        </div>
+        </motion.div>
 
-        {/* Stats bar */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        {/* Stats */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: 'Total Documents', value: docs.length,  color: 'text-violet-600' },
-            { label: 'Ready',           value: readyCount,   color: 'text-emerald-600' },
-            { label: 'Total Chunks',    value: totalChunks,  color: 'text-blue-600' },
-          ].map(({ label, value, color }) => (
-            <div key={label} className="card py-3 px-4 text-center">
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
+            { label: 'Total Documents', value: docs.length,  icon: FileText,  color: '#6C63FF', bg: 'rgba(108,99,255,0.08)' },
+            { label: 'Ready',           value: readyCount,   icon: CheckCircle, color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+            { label: 'Total Chunks',    value: totalChunks,  icon: Database,  color: '#2563EB', bg: 'rgba(37,99,235,0.08)' },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="card py-4 px-5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: bg }}><Icon size={16} style={{ color }} /></div>
+              <div>
+                <p className="text-xl font-bold font-display" style={{ color }}>{value}</p>
+                <p className="text-xs text-gray-500">{label}</p>
+              </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Upload Zone */}
-        <div
+        {/* Upload zone */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           onDragOver={e => { e.preventDefault(); setDragging(true) }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
-          onClick={() => fileRef.current?.click()}
-          className={clsx(
-            'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition mb-6',
-            dragging
-              ? 'border-violet-400 bg-violet-50 dark:bg-violet-950'
-              : 'border-gray-200 dark:border-gray-700 hover:border-violet-300 hover:bg-violet-50/30 dark:hover:bg-violet-950/20'
-          )}
-        >
+          onClick={() => !uploading && fileRef.current?.click()}
+          className="relative mb-6 rounded-2xl p-10 text-center cursor-pointer transition-all duration-200"
+          style={{
+            border: dragging ? '2px solid #6C63FF' : '2px dashed #E5E7EB',
+            background: dragging ? 'rgba(108,99,255,0.04)' : 'white',
+          }}>
           <input ref={fileRef} type="file" multiple className="hidden"
             accept=".pdf,.txt,.docx,.doc,.md,.csv,.xlsx,.xls"
             onChange={e => upload(e.target.files)} />
-          <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: uploading ? 'rgba(108,99,255,0.1)' : 'rgba(108,99,255,0.08)' }}>
             {uploading
-              ? <Loader2 size={24} className="text-violet-600 animate-spin" />
-              : <Upload size={24} className="text-violet-600" />
+              ? <Loader2 size={24} style={{ color: '#6C63FF' }} className="animate-spin" />
+              : <Upload size={24} style={{ color: '#6C63FF' }} />
             }
           </div>
-          <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {uploading ? 'Uploading and processing...' : 'Drop files here or click to upload'}
-          </p>
-          <p className="text-sm text-gray-400 dark:text-gray-500">
-            PDF, DOCX, TXT, MD, CSV, XLSX · Max 50MB per file
-          </p>
-        </div>
 
-        {/* Search + list */}
-        <div className="card p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 gap-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-              Documents <span className="text-gray-400 font-normal text-sm">({filtered.length})</span>
-            </h3>
-            <div className="relative flex-1 max-w-xs">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          {uploading && progress > 0 && (
+            <div className="mb-3">
+              <div className="h-1.5 rounded-full overflow-hidden mx-auto max-w-xs"
+                style={{ background: 'rgba(108,99,255,0.15)' }}>
+                <motion.div className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #6C63FF, #7C3AED)' }}
+                  initial={{ width: 0 }} animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3 }} />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">{progress}% uploaded</p>
+            </div>
+          )}
+
+          <p className="font-semibold text-gray-700">
+            {uploading ? 'Processing documents…' : 'Drop files here or click to upload'}
+          </p>
+          <p className="text-sm text-gray-400 mt-1">PDF, DOCX, TXT, MD, CSV, XLSX · Max 50MB per file</p>
+        </motion.div>
+
+        {/* List */}
+        <div className="rounded-2xl overflow-hidden"
+          style={{ border: '1px solid rgba(0,0,0,0.06)', background: 'white' }}>
+
+          <div className="flex items-center justify-between px-5 py-4"
+            style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <p className="text-sm font-semibold text-gray-900 font-display">
+              Documents{' '}
+              <span className="text-gray-400 font-normal">({filtered.length})</span>
+            </p>
+            <div className="relative">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input pl-8 py-1.5 text-sm" placeholder="Search documents..." />
+                className="pl-8 pr-8 py-2 text-xs rounded-xl outline-none transition-all"
+                style={{ background: '#F8FAFC', border: '1px solid #E5E7EB', width: '200px', color: '#111827' }}
+                placeholder="Search…" />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <X size={14} />
+                <button onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X size={12} />
                 </button>
               )}
             </div>
           </div>
 
           {loading ? (
-            <div className="p-10 flex justify-center">
-              <Loader2 size={24} className="animate-spin text-violet-600" />
+            <div className="p-8 space-y-3">
+              {[1,2,3].map(i => <div key={i} className="skeleton h-16 rounded-2xl" />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="p-14 text-center">
-              <FileText size={36} className="text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-500 dark:text-gray-400">
-                {search ? 'No documents match your search.' : 'No documents yet. Upload your first file above.'}
-              </p>
-            </div>
+            <AnimatePresence>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="p-16 text-center">
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+                  style={{ background: 'rgba(108,99,255,0.06)' }}>
+                  <FileText size={24} style={{ color: '#6C63FF', opacity: 0.5 }} />
+                </div>
+                <p className="font-semibold text-gray-600 mb-1">
+                  {search ? 'No documents match' : 'No documents yet'}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {search ? 'Try a different search term' : 'Upload your first document to get started'}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           ) : (
-            <div className="p-2 divide-y divide-gray-50 dark:divide-gray-800/50">
+            <motion.div variants={container} initial="hidden" animate="show"
+              className="p-3 space-y-2">
               {filtered.map(doc => (
-                <DocRow key={doc.id} doc={doc} onDelete={deleteDoc} onReindex={reindexDoc} />
+                <DocCard key={doc.id} doc={doc} onDelete={deleteDoc} onReindex={reindexDoc} />
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
 

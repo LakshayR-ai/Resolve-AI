@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import re
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -115,3 +115,28 @@ def update_me(
     db.commit()
     db.refresh(current_user)
     return {"message": "Profile updated", "full_name": current_user.full_name}
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        return v
+
+
+@router.post("/change-password")
+def change_password(
+    request: PasswordChangeRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(__import__("core.dependencies", fromlist=["get_current_user"]).get_current_user)
+):
+    if not verify_password(request.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    current_user.hashed_password = hash_password(request.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}

@@ -5,7 +5,9 @@ Customers access this via /widget/{company_slug}
 import uuid
 import time
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
@@ -16,6 +18,7 @@ from services.llm_service import generate_response, classify_issue, detect_senti
 
 router = APIRouter(prefix="/widget", tags=["Public Widget"])
 logger = logging.getLogger(__name__)
+limiter = Limiter(key_func=get_remote_address)
 
 
 class WidgetChatRequest(BaseModel):
@@ -174,3 +177,54 @@ def widget_feedback(
     msg.feedback = feedback
     db.commit()
     return {"status": "ok"}
+
+
+class EscalateRequest(BaseModel):
+    session_id: str
+    customer_name: Optional[str] = None
+    customer_email: Optional[str] = None
+    reason: Optional[str] = None
+
+
+@router.post("/{slug}/escalate")
+def escalate_to_human(
+    slug: str,
+    request: EscalateRequest,
+    db: Session = Depends(get_db)
+):
+    """Customer requests human support — marks session for escalation."""
+    company = db.query(models.Company).filter(
+        models.Company.slug == slug,
+        models.Company.is_active == True
+    ).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    session = db.query(models.ChatSession).filter(
+        models.ChatSession.session_id == request.session_id,
+        models.ChatSession.company_id == company.id,
+    ).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Store escalation as a system message
+    escalation_msg = models.ChatMessage(
+        session_id=request.session_id,
+        role="system",
+        content=f"[ESCALATION REQUEST] Customer requested human support. Reason: {request.reason or 'Not specified'}. Email: {request.customer_email or 'Not provided'}",
+    )
+    db.add(escalation_msg)
+
+    # Update customer info if provided
+    if request.customer_name:
+        session.customer_name = request.customer_name
+    if request.customer_email:
+        session.customer_email = request.customer_email
+
+    db.commit()
+
+    return {
+        "status": "escalated",
+        "message": "A support agent will reach out to you shortly.",
+        "session_id": request.session_id,
+    }

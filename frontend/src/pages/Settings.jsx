@@ -9,10 +9,12 @@ export default function Settings() {
   const { user, login } = useAuth()
   const [saving, setSaving] = useState(false)
   const [savingCompany, setSavingCompany] = useState(false)
+  const [savingPwd, setSavingPwd] = useState(false)
   const [copied, setCopied] = useState(false)
   const [embedConfig, setEmbedConfig] = useState(null)
   const [profile, setProfile] = useState({ full_name: user?.full_name || '' })
   const [company, setCompany] = useState({ name: '', description: '', website: '', logo_url: '' })
+  const [passwords, setPasswords] = useState({ current: '', newPass: '' })
 
   useEffect(() => {
     api.get('/company/profile').then(r => {
@@ -58,6 +60,24 @@ export default function Settings() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
     toast.success('Copied to clipboard!')
+  }
+
+  const changePassword = async (e) => {
+    e.preventDefault()
+    if (!passwords.current || !passwords.newPass) { toast.error('Fill in both fields'); return }
+    setSavingPwd(true)
+    try {
+      await api.post('/auth/change-password', {
+        current_password: passwords.current,
+        new_password: passwords.newPass,
+      })
+      toast.success('Password updated')
+      setPasswords({ current: '', newPass: '' })
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update password')
+    } finally {
+      setSavingPwd(false)
+    }
   }
 
   return (
@@ -196,19 +216,24 @@ export default function Settings() {
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Security</h3>
             </div>
-            <div className="space-y-4">
+            <form onSubmit={changePassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Current Password</label>
+                <input className="input" type="password" value={passwords.current}
+                  onChange={e => setPasswords(p => ({ ...p, current: e.target.value }))}
+                  placeholder="••••••••" />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">New Password</label>
-                <input className="input" type="password" placeholder="Min 8 characters" />
+                <input className="input" type="password" value={passwords.newPass}
+                  onChange={e => setPasswords(p => ({ ...p, newPass: e.target.value }))}
+                  placeholder="Min 8 characters" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirm Password</label>
-                <input className="input" type="password" placeholder="Repeat password" />
-              </div>
-              <button className="btn-primary flex items-center gap-2">
-                <Key size={16} /> Update Password
+              <button type="submit" disabled={savingPwd} className="btn-primary flex items-center gap-2">
+                {savingPwd ? <Loader2 size={16} className="animate-spin" /> : <Key size={16} />}
+                {savingPwd ? 'Updating...' : 'Update Password'}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>

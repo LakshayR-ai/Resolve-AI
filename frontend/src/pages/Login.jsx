@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const fade = { hidden:{ opacity:0, y:20 }, show:{ opacity:1, y:0 } }

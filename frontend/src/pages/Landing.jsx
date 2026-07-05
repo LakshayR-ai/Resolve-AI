@@ -20,11 +20,6 @@ const STEPS = [
   { n:'03', c:'#10B981', title:'Your AI Goes Live',        desc:'Share your link or copy the embed snippet. Customers immediately get accurate answers from your knowledge base.' },
 ]
 
-const TESTIMONIALS = [
-  { name:'Sarah K.', role:'Customer Success Lead', co:'TechFlow', text:'ResolveAI reduced our first-response time from 4 hours to under 30 seconds. The accuracy is remarkable.', stars:5 },
-  { name:'Marcus D.', role:'Head of Support', co:'CloudBase', text:'Finally an AI that actually stays on-topic. It only answers from our docs — no hallucinations at all.', stars:5 },
-  { name:'Priya M.', role:'Product Manager', co:'Nexify', text:'Setup took 4 minutes. We uploaded our FAQ and had a working chatbot before lunch. Absolutely wild.', stars:5 },
-]
 
 export default function Landing() {
   return (
@@ -251,41 +246,6 @@ export default function Landing() {
                 <h3 style={{ fontSize:17, fontWeight:700, marginBottom:10,
                   fontFamily:"'Plus Jakarta Sans',sans-serif" }}>{title}</h3>
                 <p style={{ fontSize:14, color:'rgba(255,255,255,0.48)', lineHeight:1.7, margin:0 }}>{desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section style={{ padding:'100px 24px', width:'100%' }}>
-        <div style={{ maxWidth:1100, margin:'0 auto' }}>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once:true }} variants={stag}
-            style={{ textAlign:'center', marginBottom:60 }}>
-            <motion.h2 variants={fade}
-              style={{ fontSize:'clamp(28px,4vw,50px)', fontFamily:"'Plus Jakarta Sans',sans-serif",
-                fontWeight:800, letterSpacing:'-0.035em', marginBottom:14 }}>
-              Loved by support teams
-            </motion.h2>
-          </motion.div>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once:true }} variants={stag}
-            style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:20 }}>
-            {TESTIMONIALS.map(({ name, role, co, text, stars }, i) => (
-              <motion.div key={i} variants={fade}
-                style={{ padding:28, borderRadius:18,
-                  background:'rgba(255,255,255,0.04)',
-                  border:'1px solid rgba(255,255,255,0.09)' }}>
-                <div style={{ display:'flex', gap:3, marginBottom:16 }}>
-                  {Array(stars).fill(0).map((_,j)=>(
-                    <span key={j} style={{ fontSize:16, color:'#F59E0B' }}>★</span>
-                  ))}
-                </div>
-                <p style={{ fontSize:14, color:'rgba(255,255,255,0.65)', lineHeight:1.75,
-                  marginBottom:20 }}>"{text}"</p>
-                <div>
-                  <p style={{ fontSize:14, fontWeight:600, color:'white', margin:'0 0 2px' }}>{name}</p>
-                  <p style={{ fontSize:12, color:'rgba(255,255,255,0.4)', margin:0 }}>{role} · {co}</p>
-                </div>
               </motion.div>
             ))}
           </motion.div>

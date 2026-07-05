@@ -1,246 +1,279 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
-import { Bot, User, Send, ThumbsUp, ThumbsDown, Loader2, AlertCircle, PhoneCall, X, FileText } from 'lucide-react'
+import {
+  Bot, User, Send, ThumbsUp, ThumbsDown, Loader2,
+  AlertCircle, PhoneCall, X, FileText, MessageSquare
+} from 'lucide-react'
 import clsx from 'clsx'
 
-const publicApi = axios.create({ baseURL: '/api/v1' })
+const pub = axios.create({ baseURL: '/api/v1' })
 
-function TypingIndicator() {
+function TypingDots() {
   return (
-    <div className="flex items-end gap-3">
-      <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-        <Bot size={16} className="text-violet-600" />
+    <div style={{ display:'flex',alignItems:'flex-end',gap:10 }}>
+      <div style={{ width:30,height:30,borderRadius:'50%',flexShrink:0,
+        background:'rgba(108,99,255,.1)',display:'flex',alignItems:'center',justifyContent:'center' }}>
+        <Bot size={14} color="#6C63FF"/>
       </div>
-      <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-        <div className="flex gap-1.5 items-center h-4">
-          <span className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
-          <span className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
-          <span className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
+      <div style={{ padding:'10px 14px',borderRadius:'14px 14px 14px 4px',
+        background:'white',border:'1px solid rgba(108,99,255,.1)',
+        boxShadow:'0 2px 8px rgba(0,0,0,.06)' }}>
+        <div style={{ display:'flex',gap:4,alignItems:'center',height:14 }}>
+          {[0,1,2].map(i=>(
+            <div key={i} style={{ width:6,height:6,borderRadius:'50%',background:'#94A3B8',
+              animationName:'typing-bounce',animationDuration:'1.4s',
+              animationTimingFunction:'ease-in-out',animationIterationCount:'infinite',
+              animationDelay:`${i*.18}s` }} />
+          ))}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function Message({ msg, onFeedback }) {
-  const isUser = msg.role === 'user'
-  if (msg.role === 'system') return null
-  return (
-    <div className={clsx('flex items-end gap-3 message-enter', isUser && 'flex-row-reverse')}>
-      <div className={clsx('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-        isUser ? 'bg-violet-600' : 'bg-violet-100')}>
-        {isUser ? <User size={15} className="text-white" /> : <Bot size={15} className="text-violet-600" />}
-      </div>
-      <div className={clsx('max-w-[78%] flex flex-col gap-1.5', isUser ? 'items-end' : 'items-start')}>
-        <div className={clsx('px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm',
-          isUser
-            ? 'bg-violet-600 text-white rounded-br-sm'
-            : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm')}>
-          {msg.content}
-        </div>
-        {msg.sources?.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {msg.sources.map((s, i) => (
-              <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-600 rounded-full text-[10px] border border-violet-100">
-                <FileText size={9} />{s.split('/').pop() || `Source ${i+1}`}
-              </span>
-            ))}
-          </div>
-        )}
-        {!isUser && msg.id && (
-          <div className="flex items-center gap-1 px-1">
-            <button onClick={() => onFeedback(msg.id, 'helpful')}
-              className={clsx('p-1.5 rounded-lg transition', msg.feedback === 'helpful' ? 'text-emerald-500 bg-emerald-50' : 'text-gray-300 hover:text-emerald-500 hover:bg-emerald-50')}>
-              <ThumbsUp size={12} />
-            </button>
-            <button onClick={() => onFeedback(msg.id, 'not_helpful')}
-              className={clsx('p-1.5 rounded-lg transition', msg.feedback === 'not_helpful' ? 'text-red-500 bg-red-50' : 'text-gray-300 hover:text-red-500 hover:bg-red-50')}>
-              <ThumbsDown size={12} />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
 function EscalateModal({ slug, sessionId, onClose }) {
-  const [form, setForm] = useState({ name: '', email: '', reason: '' })
+  const [form, setForm] = useState({ name:'', email:'', reason:'' })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
 
-  const submit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+  const submit = async e => {
+    e.preventDefault(); setLoading(true)
     try {
-      await publicApi.post(`/widget/${slug}/escalate`, {
-        session_id: sessionId,
-        customer_name: form.name,
-        customer_email: form.email,
-        reason: form.reason,
-      })
+      await pub.post(`/widget/${slug}/escalate`, { session_id:sessionId, customer_name:form.name, customer_email:form.email, reason:form.reason })
       setDone(true)
-    } catch {
-      setDone(true)
-    } finally {
-      setLoading(false)
-    }
+    } catch { setDone(true) }
+    finally { setLoading(false) }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">Talk to a Human</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
-        </div>
-        {done ? (
-          <div className="text-center py-4">
-            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <PhoneCall size={20} className="text-emerald-600" />
+    <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',
+      alignItems:'center',justifyContent:'center',zIndex:200,padding:16 }}>
+      <motion.div initial={{ scale:.92,opacity:0 }} animate={{ scale:1,opacity:1 }}
+        style={{ background:'white',borderRadius:18,padding:28,width:'100%',maxWidth:380,
+          boxShadow:'0 24px 64px rgba(0,0,0,.2)' }}>
+        <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
+          <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+            <div style={{ width:32,height:32,borderRadius:9,background:'rgba(108,99,255,.1)',
+              display:'flex',alignItems:'center',justifyContent:'center' }}>
+              <PhoneCall size={15} color="#6C63FF"/>
             </div>
-            <p className="font-medium text-gray-900 mb-1">Request received!</p>
-            <p className="text-sm text-gray-500">A support agent will contact you shortly.</p>
-            <button onClick={onClose} className="mt-4 btn-primary w-full">Close</button>
+            <h3 style={{ fontSize:15,fontWeight:700,color:'#0F172A',margin:0,
+              fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Talk to a Human</h3>
+          </div>
+          <button onClick={onClose} style={{ background:'none',border:'none',cursor:'pointer',color:'#94A3B8',display:'flex' }}>
+            <X size={18}/>
+          </button>
+        </div>
+
+        {done ? (
+          <div style={{ textAlign:'center',padding:'12px 0' }}>
+            <div style={{ width:48,height:48,borderRadius:'50%',background:'rgba(16,185,129,.1)',
+              margin:'0 auto 14px',display:'flex',alignItems:'center',justifyContent:'center' }}>
+              <PhoneCall size={20} color="#10B981"/>
+            </div>
+            <p style={{ fontSize:14,fontWeight:600,color:'#0F172A',marginBottom:6 }}>Request received!</p>
+            <p style={{ fontSize:13,color:'#64748B',marginBottom:18 }}>A support agent will contact you shortly.</p>
+            <button onClick={onClose} style={{ padding:'10px 24px',background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+              color:'white',border:'none',borderRadius:10,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit' }}>
+              Close
+            </button>
           </div>
         ) : (
-          <form onSubmit={submit} className="space-y-3">
+          <form onSubmit={submit} style={{ display:'flex',flexDirection:'column',gap:12 }}>
+            {[{ key:'name',label:'Your Name',type:'text',ph:'John Smith' },
+              { key:'email',label:'Email',type:'email',ph:'john@email.com' }].map(({ key,label,type,ph })=>(
+              <div key={key}>
+                <label style={{ display:'block',fontSize:11,fontWeight:600,color:'#64748B',
+                  textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:6 }}>{label}</label>
+                <input type={type} required={key==='email'} placeholder={ph} value={form[key]}
+                  onChange={e=>setForm(f=>({...f,[key]:e.target.value}))}
+                  style={{ width:'100%',padding:'9px 12px',fontSize:13,background:'#F8FAFC',
+                    border:'1.5px solid #E5E7EB',borderRadius:9,outline:'none',fontFamily:'inherit',color:'#0F172A' }}
+                  onFocus={e=>{e.target.style.borderColor='#6C63FF';e.target.style.background='white'}}
+                  onBlur={e=>{e.target.style.borderColor='#E5E7EB';e.target.style.background='#F8FAFC'}}/>
+              </div>
+            ))}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Your Name</label>
-              <input className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} placeholder="John Smith" />
+              <label style={{ display:'block',fontSize:11,fontWeight:600,color:'#64748B',
+                textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:6 }}>What do you need help with?</label>
+              <textarea rows={3} value={form.reason} onChange={e=>setForm(f=>({...f,reason:e.target.value}))}
+                placeholder="Describe your issue…"
+                style={{ width:'100%',padding:'9px 12px',fontSize:13,background:'#F8FAFC',
+                  border:'1.5px solid #E5E7EB',borderRadius:9,outline:'none',
+                  fontFamily:'inherit',color:'#0F172A',resize:'none' }}
+                onFocus={e=>{e.target.style.borderColor='#6C63FF';e.target.style.background='white'}}
+                onBlur={e=>{e.target.style.borderColor='#E5E7EB';e.target.style.background='#F8FAFC'}}/>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
-              <input className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                type="email" value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} placeholder="you@email.com" required />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">What do you need help with?</label>
-              <textarea className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                rows={3} value={form.reason} onChange={e => setForm(f => ({...f, reason: e.target.value}))} placeholder="Describe your issue..." />
-            </div>
-            <button type="submit" disabled={loading || !form.email}
-              className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2">
-              {loading ? <Loader2 size={15} className="animate-spin" /> : <PhoneCall size={15} />}
-              {loading ? 'Sending...' : 'Request Human Support'}
+            <button type="submit" disabled={loading||!form.email}
+              style={{ padding:'11px',background:'linear-gradient(135deg,#6C63FF,#7C3AED)',color:'white',
+                border:'none',borderRadius:10,fontSize:14,fontWeight:600,cursor:'pointer',
+                display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+                fontFamily:'inherit',opacity:(loading||!form.email)?.5:1,
+                boxShadow:'0 4px 12px rgba(108,99,255,.3)' }}>
+              {loading ? <Loader2 size={15} style={{ animation:'spin 1s linear infinite' }}/> : <PhoneCall size={15}/>}
+              {loading ? 'Sending…' : 'Request Human Support'}
             </button>
           </form>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
 
 export default function PublicChat() {
   const { slug } = useParams()
-  const [info,        setInfo]        = useState(null)
-  const [error,       setError]       = useState(null)
-  const [messages,    setMessages]    = useState([])
-  const [input,       setInput]       = useState('')
-  const [sessionId,   setSessionId]   = useState(null)
-  const [loading,     setLoading]     = useState(false)
-  const [infoLoading, setInfoLoading] = useState(true)
-  const [showEscalate, setShowEscalate] = useState(false)
-  const bottomRef = useRef(null)
+  const [info,setInfo]=useState(null);const [error,setError]=useState(null)
+  const [messages,setMessages]=useState([]);const [input,setInput]=useState('')
+  const [sessionId,setSessionId]=useState(null);const [loading,setLoading]=useState(false)
+  const [infoLoading,setInfoLoading]=useState(true);const [showEscalate,setShowEscalate]=useState(false)
+  const bottomRef=useRef(null)
 
-  useEffect(() => {
-    publicApi.get(`/widget/${slug}/info`)
-      .then(r => { setInfo(r.data); setMessages([{ role: 'assistant', content: r.data.welcome_message }]) })
-      .catch(() => setError('This chatbot could not be found or is currently inactive.'))
-      .finally(() => setInfoLoading(false))
-  }, [slug])
+  useEffect(()=>{
+    pub.get(`/widget/${slug}/info`).then(r=>{ setInfo(r.data); setMessages([{ role:'assistant',content:r.data.welcome_message }]) })
+      .catch(()=>setError('Chatbot not found or currently inactive.')).finally(()=>setInfoLoading(false))
+  },[slug])
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
+  useEffect(()=>{ bottomRef.current?.scrollIntoView({ behavior:'smooth' }) },[messages,loading])
 
-  const send = async (text) => {
-    const msg = (text || input).trim()
-    if (!msg || loading) return
-    setInput('')
-    setMessages(m => [...m, { role: 'user', content: msg }])
-    setLoading(true)
-    try {
-      const { data } = await publicApi.post(`/widget/${slug}/chat`, { message: msg, session_id: sessionId })
+  const send=async text=>{
+    const msg=(text||input).trim(); if(!msg||loading)return
+    setInput(''); setMessages(m=>[...m,{ role:'user',content:msg }]); setLoading(true)
+    try{
+      const { data }=await pub.post(`/widget/${slug}/chat`,{ message:msg,session_id:sessionId })
       setSessionId(data.session_id)
-      setMessages(m => [...m, { id: data.message_id, role: 'assistant', content: data.answer, feedback: null }])
-    } catch {
-      setMessages(m => [...m, { role: 'assistant', content: "I'm having trouble right now. Please try again." }])
-    } finally {
-      setLoading(false) }
+      setMessages(m=>[...m,{ id:data.message_id,role:'assistant',content:data.answer,feedback:null }])
+    }catch{ setMessages(m=>[...m,{ role:'assistant',content:"I'm having trouble right now. Please try again." }]) }
+    finally{ setLoading(false) }
   }
 
-  const handleFeedback = async (messageId, feedback) => {
-    try {
-      await publicApi.post(`/widget/${slug}/feedback`, null, { params: { message_id: messageId, feedback } })
-      setMessages(m => m.map(msg => msg.id === messageId ? { ...msg, feedback } : msg))
-    } catch {}
+  const feedback=async(id,fb)=>{
+    try{ await pub.post(`/widget/${slug}/feedback`,null,{ params:{ message_id:id,feedback:fb } })
+      setMessages(m=>m.map(msg=>msg.id===id?{...msg,feedback:fb}:msg)) }catch{}
   }
 
-  if (infoLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-indigo-50">
-      <Loader2 size={32} className="animate-spin text-violet-600" />
+  if(infoLoading) return (
+    <div style={{ minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',
+      background:'linear-gradient(135deg,#F0F4FF,#EEF2FF)' }}>
+      <Loader2 size={28} color="#6C63FF" style={{ animation:'spin 1s linear infinite' }}/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-indigo-50 p-4">
-      <div className="text-center max-w-sm">
-        <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <AlertCircle size={28} className="text-red-500" />
+  if(error) return (
+    <div style={{ minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',
+      background:'linear-gradient(135deg,#F0F4FF,#EEF2FF)',padding:24 }}>
+      <div style={{ textAlign:'center',maxWidth:360 }}>
+        <div style={{ width:60,height:60,borderRadius:16,background:'rgba(239,68,68,.1)',
+          margin:'0 auto 16px',display:'flex',alignItems:'center',justifyContent:'center' }}>
+          <AlertCircle size={26} color="#DC2626"/>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Chatbot Not Found</h2>
-        <p className="text-gray-500 text-sm">{error}</p>
+        <h2 style={{ fontSize:20,fontWeight:700,color:'#0F172A',marginBottom:8,
+          fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Chatbot Not Found</h2>
+        <p style={{ fontSize:14,color:'#64748B' }}>{error}</p>
       </div>
     </div>
   )
 
+  const SUGGESTIONS = ['What are your services?','How do I get started?','What is your pricing?','Contact support']
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      {showEscalate && sessionId && (
-        <EscalateModal slug={slug} sessionId={sessionId} onClose={() => setShowEscalate(false)} />
+    <div style={{ minHeight:'100vh',background:'linear-gradient(135deg,#F0F4FF,#EEF2FF)',
+      display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
+      <style>{`
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes typing-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+      `}</style>
+
+      {showEscalate&&sessionId&&(
+        <EscalateModal slug={slug} sessionId={sessionId} onClose={()=>setShowEscalate(false)}/>
       )}
 
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl shadow-violet-100 overflow-hidden flex flex-col"
-        style={{ height: '88vh', maxHeight: '720px' }}>
+      <div style={{ width:'100%',maxWidth:680,background:'white',borderRadius:24,
+        boxShadow:'0 24px 64px rgba(108,99,255,.15)',overflow:'hidden',
+        display:'flex',flexDirection:'column',height:'88vh',maxHeight:720 }}>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+        <div style={{ background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+          padding:'16px 20px',display:'flex',alignItems:'center',justifyContent:'space-between' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+            <div style={{ width:38,height:38,borderRadius:11,background:'rgba(255,255,255,.2)',
+              display:'flex',alignItems:'center',justifyContent:'center' }}>
               {info?.logo_url
-                ? <img src={info.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                : <Bot size={20} className="text-white" />}
+                ? <img src={info.logo_url} alt="" style={{ width:30,height:30,borderRadius:8,objectFit:'cover' }}/>
+                : <Bot size={19} color="white"/>}
             </div>
             <div>
-              <p className="font-semibold text-white text-sm">{info?.company_name} AI Assistant</p>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-xs text-white/80">Online · Powered by Resolve AI</span>
+              <p style={{ fontSize:14,fontWeight:700,color:'white',margin:'0 0 2px' }}>{info?.company_name} AI</p>
+              <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+                <div style={{ width:7,height:7,borderRadius:'50%',background:'#34D399',
+                  animation:'pulse-green 2s infinite' }}/>
+                <span style={{ fontSize:11,color:'rgba(255,255,255,.8)' }}>Online · Powered by ResolveAI</span>
               </div>
             </div>
           </div>
-          {sessionId && (
-            <button onClick={() => setShowEscalate(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs rounded-lg transition">
-              <PhoneCall size={13} /> Talk to Human
+          {sessionId&&(
+            <button onClick={()=>setShowEscalate(true)}
+              style={{ display:'flex',alignItems:'center',gap:6,padding:'6px 12px',
+                background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.25)',
+                borderRadius:9,color:'white',fontSize:12,fontWeight:500,cursor:'pointer',fontFamily:'inherit' }}>
+              <PhoneCall size={13}/> Human Support
             </button>
           )}
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50/40">
-          {messages.map((msg, i) => <Message key={i} msg={msg} onFeedback={handleFeedback} />)}
-          {loading && <TypingIndicator />}
-          <div ref={bottomRef} />
+        <div style={{ flex:1,overflowY:'auto',padding:20,display:'flex',flexDirection:'column',gap:14,
+          background:'#FAFBFF' }}>
+          {messages.map((m,i)=>(
+            <motion.div key={i} initial={{ opacity:0,y:8 }} animate={{ opacity:1,y:0 }}
+              style={{ display:'flex',alignItems:'flex-end',gap:10,
+                flexDirection:m.role==='user'?'row-reverse':'row' }}>
+              <div style={{ width:30,height:30,borderRadius:'50%',flexShrink:0,
+                background:m.role==='user'?'linear-gradient(135deg,#6C63FF,#7C3AED)':'rgba(108,99,255,.1)',
+                display:'flex',alignItems:'center',justifyContent:'center' }}>
+                {m.role==='user'?<User size={13} color="white"/>:<Bot size={13} color="#6C63FF"/>}
+              </div>
+              <div style={{ maxWidth:'76%',display:'flex',flexDirection:'column',gap:5,
+                alignItems:m.role==='user'?'flex-end':'flex-start' }}>
+                <div style={{ padding:'11px 14px',fontSize:14,lineHeight:1.65,
+                  borderRadius:m.role==='user'?'16px 16px 4px 16px':'16px 16px 16px 4px',
+                  background:m.role==='user'?'linear-gradient(135deg,#6C63FF,#7C3AED)':'white',
+                  color:m.role==='user'?'white':'#111827',
+                  boxShadow:m.role==='user'?'0 4px 12px rgba(108,99,255,.25)':'0 2px 8px rgba(0,0,0,.06)',
+                  border:m.role==='user'?'none':'1px solid rgba(108,99,255,.09)' }}>
+                  {m.content}
+                </div>
+                {m.role==='assistant'&&m.id&&(
+                  <div style={{ display:'flex',gap:4 }}>
+                    {[{ k:'helpful',Icon:ThumbsUp },{ k:'not_helpful',Icon:ThumbsDown }].map(({ k,Icon })=>(
+                      <button key={k} onClick={()=>feedback(m.id,k)}
+                        style={{ padding:5,borderRadius:7,border:'none',cursor:'pointer',display:'flex',
+                          background:m.feedback===k?(k==='helpful'?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)'):'none',
+                          color:m.feedback===k?(k==='helpful'?'#10B981':'#EF4444'):'#CBD5E1',transition:'all .15s' }}>
+                        <Icon size={13}/>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+          {loading&&<TypingDots/>}
+          <div ref={bottomRef}/>
         </div>
 
-        {/* Suggested questions */}
-        {messages.length === 1 && (
-          <div className="px-6 pb-2 flex flex-wrap gap-2">
-            {['What are your services?', 'How do I get started?', 'What is your pricing?', 'How do I contact support?'].map(q => (
-              <button key={q} onClick={() => send(q)}
-                className="text-xs px-3 py-1.5 rounded-full border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 transition">
+        {/* Suggestions */}
+        {messages.length===1&&(
+          <div style={{ padding:'0 16px 12px',display:'flex',flexWrap:'wrap',gap:7,background:'#FAFBFF' }}>
+            {SUGGESTIONS.map(q=>(
+              <button key={q} onClick={()=>send(q)}
+                style={{ padding:'7px 13px',borderRadius:99,fontSize:12,fontWeight:500,
+                  background:'white',border:'1px solid rgba(108,99,255,.2)',color:'#6C63FF',
+                  cursor:'pointer',transition:'all .15s',boxShadow:'0 1px 4px rgba(0,0,0,.04)',fontFamily:'inherit' }}
+                onMouseEnter={e=>{e.currentTarget.style.background='rgba(108,99,255,.07)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='white'}}>
                 {q}
               </button>
             ))}
@@ -248,21 +281,30 @@ export default function PublicChat() {
         )}
 
         {/* Input */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-white">
-          <form onSubmit={e => { e.preventDefault(); send() }} className="flex gap-3">
-            <input value={input} onChange={e => setInput(e.target.value)}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
-              placeholder="Type your question…" disabled={loading} />
-            <button type="submit" disabled={loading || !input.trim()}
-              className="w-11 h-11 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition flex-shrink-0">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+        <div style={{ padding:'12px 16px',borderTop:'1px solid rgba(108,99,255,.08)',background:'white' }}>
+          <form onSubmit={e=>{e.preventDefault();send()}}
+            style={{ display:'flex',gap:9,padding:'8px 10px',borderRadius:14,
+              background:'#F8FAFC',border:'1.5px solid rgba(108,99,255,.16)',
+              boxShadow:'0 2px 10px rgba(108,99,255,.07)' }}>
+            <input value={input} onChange={e=>setInput(e.target.value)} disabled={loading}
+              placeholder="Type your question…"
+              style={{ flex:1,padding:'5px 6px',fontSize:14,background:'transparent',
+                border:'none',outline:'none',color:'#0F172A',fontFamily:'inherit' }}/>
+            <button type="submit" disabled={loading||!input.trim()}
+              style={{ width:34,height:34,borderRadius:9,border:'none',cursor:'pointer',
+                background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+                display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
+                boxShadow:'0 3px 10px rgba(108,99,255,.35)',
+                opacity:(loading||!input.trim())?.4:1,transition:'opacity .15s' }}>
+              {loading ? <Loader2 size={14} color="white" style={{ animation:'spin 1s linear infinite' }}/> : <Send size={14} color="white"/>}
             </button>
           </form>
-          <p className="text-center text-[11px] text-gray-400 mt-2">
-            Powered by <span className="text-violet-500 font-medium">Resolve AI</span> · AI can make mistakes
+          <p style={{ textAlign:'center',fontSize:11,color:'#94A3B8',marginTop:7 }}>
+            Powered by <span style={{ color:'#6C63FF',fontWeight:600 }}>ResolveAI</span> · AI answers from company documents only
           </p>
         </div>
       </div>
+      <style>{`@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{box-shadow:0 0 0 5px rgba(52,211,153,0)}}`}</style>
     </div>
   )
 }

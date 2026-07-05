@@ -5,225 +5,294 @@ import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import {
   MessageSquare, FileText, TrendingUp, ArrowRight, Zap,
-  CalendarDays, Calendar, Smile, Frown, Database,
-  AlertTriangle, ExternalLink, Users, BarChart3, Clock
+  CalendarDays, Calendar, Smile, Database, AlertTriangle,
+  ExternalLink, Users, BarChart3, Clock, CheckCircle2, BookOpen, Activity
 } from 'lucide-react'
 import Layout from '../components/Layout'
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
-const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden:{}, show:{ transition:{ staggerChildren:.07 } } }
+const up = { hidden:{ opacity:0, y:20 }, show:{ opacity:1, y:0 } }
 
-const STAT_CONFIGS = [
-  { key: 'total_chats',    label: 'Total Chats',     icon: MessageSquare, gradient: 'linear-gradient(135deg,#6C63FF,#7C3AED)', textColor: '#6C63FF' },
-  { key: 'today_chats',   label: "Today's Chats",   icon: CalendarDays,  gradient: 'linear-gradient(135deg,#2563EB,#3B82F6)', textColor: '#2563EB' },
-  { key: 'monthly_chats', label: 'This Month',       icon: Calendar,      gradient: 'linear-gradient(135deg,#0891B2,#06B6D4)', textColor: '#0891B2' },
-  { key: 'total_sessions',label: 'Sessions',          icon: Users,         gradient: 'linear-gradient(135deg,#7C3AED,#8B5CF6)', textColor: '#7C3AED' },
-  { key: 'total_documents',label: 'Documents',        icon: FileText,      gradient: 'linear-gradient(135deg,#059669,#10B981)', textColor: '#059669', sub: d => `${d?.knowledge_coverage ?? 0}% indexed` },
-  { key: 'avg_response_time_ms', label: 'Avg Response', icon: Clock,       gradient: 'linear-gradient(135deg,#D97706,#F59E0B)', textColor: '#D97706', format: v => `${v}ms` },
-  { key: 'positive_pct',  label: 'Positive',          icon: Smile,         gradient: 'linear-gradient(135deg,#0891B2,#10B981)', textColor: '#0891B2', format: v => `${v}%` },
-  { key: 'negative_pct',  label: 'Negative',          icon: Frown,         gradient: 'linear-gradient(135deg,#DC2626,#EF4444)', textColor: '#DC2626', format: v => `${v}%` },
+const METRICS = [
+  { key:'total_chats',          label:'Total Chats',    sub:'All time',           icon:MessageSquare, grad:'linear-gradient(135deg,#6C63FF,#7C3AED)', tc:'#6C63FF' },
+  { key:'today_chats',          label:"Today's Chats",  sub:'Since midnight',     icon:CalendarDays,  grad:'linear-gradient(135deg,#2563EB,#3B82F6)', tc:'#2563EB' },
+  { key:'monthly_chats',        label:'This Month',     sub:'Current month',      icon:Calendar,      grad:'linear-gradient(135deg,#0891B2,#06B6D4)', tc:'#0891B2' },
+  { key:'total_sessions',       label:'Sessions',       sub:'Unique convos',      icon:Users,         grad:'linear-gradient(135deg,#7C3AED,#8B5CF6)', tc:'#7C3AED' },
+  { key:'total_documents',      label:'Documents',      sub:d=>`${d?.knowledge_coverage??0}% indexed`, icon:FileText, grad:'linear-gradient(135deg,#059669,#10B981)', tc:'#059669' },
+  { key:'avg_response_time_ms', label:'Avg Response',   sub:'AI latency',         icon:Clock,         grad:'linear-gradient(135deg,#D97706,#F59E0B)', tc:'#D97706', fmt:v=>`${v}ms` },
+  { key:'positive_pct',         label:'Positive',       sub:'Sentiment',          icon:Smile,         grad:'linear-gradient(135deg,#059669,#10B981)', tc:'#059669', fmt:v=>`${v}%` },
+  { key:'helpful_feedback_pct', label:'Helpful Rate',   sub:'Feedback',           icon:TrendingUp,    grad:'linear-gradient(135deg,#6C63FF,#2563EB)', tc:'#6C63FF', fmt:v=>`${v}%` },
 ]
 
-function StatCard({ config, summary, loading }) {
-  const { key, label, icon: Icon, gradient, textColor, sub, format } = config
-  const raw = summary?.[key]
-  const value = format ? format(raw ?? 0) : (raw ?? 0)
-
+function MetricCard({ m, s, loading }) {
+  const val = m.fmt ? m.fmt(s?.[m.key]??0) : (s?.[m.key]??0)
+  const sub = typeof m.sub==='function' ? m.sub(s) : m.sub
   return (
-    <motion.div variants={item}
-      className="card card-hover relative overflow-hidden"
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}>
-      {/* background glow */}
-      <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-5 translate-x-6 -translate-y-6"
-        style={{ background: gradient }} />
-
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: gradient }}>
-          <Icon size={17} className="text-white" />
+    <motion.div variants={up} whileHover={{ y:-4, transition:{ duration:.18 } }}
+      style={{ background:'white', borderRadius:16, border:'1px solid rgba(108,99,255,0.09)',
+        boxShadow:'0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(108,99,255,0.06)',
+        padding:20, position:'relative', overflow:'hidden', cursor:'default',
+        transition:'border-color .2s, box-shadow .2s' }}>
+      {/* top colour bar */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:3,
+        background:m.grad, borderRadius:'16px 16px 0 0' }} />
+      {/* glow */}
+      <div style={{ position:'absolute', bottom:-20, right:-20, width:80, height:80,
+        borderRadius:'50%', background:m.grad, opacity:.06, pointerEvents:'none' }} />
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
+        <div style={{ width:38, height:38, borderRadius:10, background:m.grad,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow:`0 4px 12px ${m.tc}44` }}>
+          <m.icon size={17} color="white" />
         </div>
-        <TrendingUp size={13} className="text-gray-300 dark:text-gray-700" />
+        <Activity size={12} color="#CBD5E1" />
       </div>
-
       {loading ? (
-        <div className="space-y-2">
-          <div className="skeleton h-8 w-20 rounded-lg" />
-          <div className="skeleton h-3 w-16 rounded" />
+        <div>
+          <div style={{ height:32, width:80, borderRadius:8, background:'linear-gradient(90deg,#F1F5F9 25%,#E8EDF5 50%,#F1F5F9 75%)', backgroundSize:'400% 100%', animation:'skeleton-wave 1.6s ease infinite', marginBottom:6 }} />
+          <div style={{ height:12, width:60, borderRadius:6, background:'linear-gradient(90deg,#F1F5F9 25%,#E8EDF5 50%,#F1F5F9 75%)', backgroundSize:'400% 100%', animation:'skeleton-wave 1.6s ease infinite' }} />
         </div>
       ) : (
         <>
-          <p className="text-2xl font-bold tracking-tight font-display"
-            style={{ color: textColor }}>{value}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{sub ? sub(summary) : label}</p>
+          <p style={{ fontSize:28, fontWeight:800, color:m.tc, lineHeight:1, marginBottom:5,
+            fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:'-0.03em' }}>{val}</p>
+          <p style={{ fontSize:12, color:'#94A3B8', marginBottom:2 }}>{sub}</p>
+          <p style={{ fontSize:11, fontWeight:600, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.07em' }}>{m.label}</p>
         </>
       )}
     </motion.div>
   )
 }
 
+const ACTIONS = [
+  { to:'/chat',      label:'Start a conversation',   sub:'Ask the AI anything',    icon:MessageSquare, c:'#6C63FF', bg:'rgba(108,99,255,0.08)' },
+  { to:'/documents', label:'Upload documents',         sub:'Add to knowledge base',  icon:FileText,      c:'#10B981', bg:'rgba(16,185,129,0.08)' },
+  { to:'/analytics', label:'View analytics',           sub:'Performance insights',   icon:BarChart3,     c:'#2563EB', bg:'rgba(37,99,235,0.08)' },
+  { to:'/history',   label:'Browse conversations',     sub:'Search chat history',    icon:Users,         c:'#F59E0B', bg:'rgba(245,158,11,0.08)' },
+  { to:'/settings',  label:'Get embed code',           sub:'Deploy on your website', icon:Database,      c:'#7C3AED', bg:'rgba(124,58,237,0.08)' },
+]
+
 export default function Dashboard() {
   const { user } = useAuth()
   const [analytics, setAnalytics] = useState(null)
-  const [loading,   setLoading]   = useState(true)
-
-  useEffect(() => {
-    api.get('/analytics/').then(r => setAnalytics(r.data)).catch(() => {}).finally(() => setLoading(false))
-  }, [])
-
+  const [loading, setLoading] = useState(true)
+  useEffect(()=>{ api.get('/analytics/').then(r=>setAnalytics(r.data)).catch(()=>{}).finally(()=>setLoading(false)) },[])
   const s = analytics?.summary
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const h = new Date().getHours()
+  const gr = h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening'
+  const em = h<12?'🌅':h<17?'☀️':'🌙'
 
   return (
     <Layout>
-      <div className="p-8 max-w-7xl mx-auto">
+      <style>{`@keyframes skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-start justify-between mb-8">
+      {/* Topbar */}
+      <div style={{ background:'rgba(255,255,255,0.92)', backdropFilter:'blur(16px)',
+        borderBottom:'1px solid rgba(108,99,255,0.08)',
+        boxShadow:'0 1px 12px rgba(108,99,255,0.05)', padding:'18px 28px' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">👋</span>
-              <h1 className="text-2xl font-bold font-display text-gray-900 dark:text-white">
-                {greeting}, {user?.full_name?.split(' ')[0]}
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:4 }}>
+              <span style={{ fontSize:20 }}>{em}</span>
+              <h1 style={{ fontSize:20, fontWeight:700, color:'#0F172A', margin:0,
+                fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:'-0.02em' }}>
+                {gr}, {user?.full_name?.split(' ')[0]}
               </h1>
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Here&apos;s what&apos;s happening with{' '}
-              <span className="font-semibold text-gray-700 dark:text-gray-300">{user?.company_name}</span>
+            <p style={{ fontSize:13, color:'#64748B', margin:0 }}>
+              AI workspace for{' '}
+              <strong style={{ color:'#6C63FF' }}>{user?.company_name}</strong>
+              {' · '}
+              <span style={{ color:'#94A3B8' }}>resolveai.app/{user?.company_slug}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display:'flex', gap:8 }}>
             <a href={`/chat/${user?.company_slug}`} target="_blank" rel="noreferrer"
-              className="btn-secondary text-sm flex items-center gap-1.5">
-              <ExternalLink size={14} /> Live Widget
+              style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 14px',
+                background:'white', border:'1px solid #E5E7EB', borderRadius:10,
+                textDecoration:'none', fontSize:13, fontWeight:500, color:'#374151',
+                boxShadow:'0 1px 3px rgba(0,0,0,0.06)', transition:'all .2s' }}>
+              <ExternalLink size={13}/> Live Widget
             </a>
-            <Link to="/chat" className="btn-primary text-sm flex items-center gap-1.5">
-              <Zap size={14} /> New Chat
+            <Link to="/chat" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px',
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)', color:'white', borderRadius:10,
+              textDecoration:'none', fontSize:13, fontWeight:600,
+              boxShadow:'0 4px 12px rgba(108,99,255,0.35)' }}>
+              <Zap size={13}/> New Chat
             </Link>
           </div>
+        </div>
+      </div>
+
+      <div style={{ padding:'24px 28px', maxWidth:1280, margin:'0 auto' }}>
+        {/* Metrics */}
+        <motion.div variants={stagger} initial="hidden" animate="show"
+          style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:20 }}>
+          {METRICS.map(m => <MetricCard key={m.key} m={m} s={s} loading={loading} />)}
         </motion.div>
 
-        {/* Stats grid */}
-        <motion.div variants={container} initial="hidden" animate="show"
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {STAT_CONFIGS.map(cfg => (
-            <StatCard key={cfg.key} config={cfg} summary={s} loading={loading} />
-          ))}
-        </motion.div>
-
-        {/* Bottom row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Quick actions */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="card">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 font-display">Quick Actions</h3>
-            <div className="space-y-1">
-              {[
-                { to: '/chat',      label: 'Start a conversation',  icon: MessageSquare, color: '#6C63FF', bg: 'rgba(108,99,255,0.08)' },
-                { to: '/documents', label: 'Upload documents',       icon: FileText,      color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
-                { to: '/analytics', label: 'View analytics',         icon: BarChart3,     color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
-                { to: '/history',   label: 'Browse chat history',    icon: Users,         color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
-                { to: '/settings',  label: 'Get embed code',         icon: Database,      color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
-              ].map(({ to, label, icon: Icon, color, bg }) => (
-                <Link key={to} to={to}
-                  className="flex items-center justify-between p-3 rounded-xl transition-all group hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: bg }}>
-                      <Icon size={14} style={{ color }} />
-                    </div>
-                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{label}</span>
-                  </div>
-                  <ArrowRight size={14} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
-                </Link>
-              ))}
+        {/* Empty KB banner */}
+        {!loading && s?.total_documents===0 && (
+          <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
+            style={{ marginBottom:20, padding:'16px 20px', borderRadius:14,
+              display:'flex', alignItems:'center', gap:16,
+              background:'linear-gradient(135deg,rgba(108,99,255,0.07),rgba(124,58,237,0.04))',
+              border:'1px solid rgba(108,99,255,0.18)' }}>
+            <div style={{ width:40, height:40, borderRadius:10, flexShrink:0,
+              background:'rgba(108,99,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <BookOpen size={18} color="#6C63FF" />
             </div>
+            <div style={{ flex:1 }}>
+              <p style={{ fontSize:14, fontWeight:600, color:'#0F172A', margin:'0 0 2px' }}>Knowledge base is empty</p>
+              <p style={{ fontSize:13, color:'#64748B', margin:0 }}>Upload your first document to start answering customer questions with AI.</p>
+            </div>
+            <Link to="/documents" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'9px 16px',
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)', color:'white', borderRadius:10,
+              textDecoration:'none', fontSize:13, fontWeight:600, flexShrink:0,
+              boxShadow:'0 4px 12px rgba(108,99,255,0.3)' }}>
+              Upload Documents →
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Bottom 3-col */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
+          {/* Quick actions */}
+          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:.22 }}
+            style={{ background:'white', borderRadius:16, border:'1px solid rgba(108,99,255,0.09)',
+              boxShadow:'0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(108,99,255,0.06)', padding:20 }}>
+            <p style={{ fontSize:14, fontWeight:700, color:'#0F172A', marginBottom:14,
+              fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Quick Actions</p>
+            {ACTIONS.map(({ to, label, sub, icon:Icon, c, bg }) => (
+              <Link key={to} to={to} style={{ textDecoration:'none', display:'block' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
+                  padding:'10px 10px', borderRadius:10, transition:'all .15s ease', marginBottom:2, cursor:'pointer' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='rgba(108,99,255,0.04)'}
+                  onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <div style={{ width:32, height:32, borderRadius:9, flexShrink:0,
+                      background:bg, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <Icon size={15} color={c} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize:13, fontWeight:500, color:'#1E293B', margin:'0 0 1px' }}>{label}</p>
+                      <p style={{ fontSize:11, color:'#94A3B8', margin:0 }}>{sub}</p>
+                    </div>
+                  </div>
+                  <ArrowRight size={13} color="#CBD5E1" />
+                </div>
+              </Link>
+            ))}
           </motion.div>
 
           {/* Sentiment */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="card">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-5 font-display">Customer Sentiment</h3>
-            {loading ? (
-              <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="skeleton h-10 rounded-xl" />)}</div>
-            ) : analytics?.sentiment_breakdown?.length > 0 ? (
-              <div className="space-y-4">
-                {analytics.sentiment_breakdown.map(s => {
-                  const colors = { Positive: '#10B981', Negative: '#EF4444', Neutral: '#6C63FF' }
-                  const bgs =    { Positive: 'rgba(16,185,129,0.1)', Negative: 'rgba(239,68,68,0.1)', Neutral: 'rgba(108,99,255,0.1)' }
+          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:.28 }}
+            style={{ background:'white', borderRadius:16, border:'1px solid rgba(108,99,255,0.09)',
+              boxShadow:'0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(108,99,255,0.06)', padding:20 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+              <p style={{ fontSize:14, fontWeight:700, color:'#0F172A', margin:0,
+                fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Customer Sentiment</p>
+              <span style={{ fontSize:12, color:'#94A3B8' }}>Last 30 days</span>
+            </div>
+            {loading ? [1,2,3].map(i=>(
+              <div key={i} style={{ height:52, borderRadius:10, marginBottom:10,
+                background:'linear-gradient(90deg,#F1F5F9 25%,#E8EDF5 50%,#F1F5F9 75%)',
+                backgroundSize:'400% 100%', animation:'skeleton-wave 1.6s ease infinite' }} />
+            )) : analytics?.sentiment_breakdown?.length>0 ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {analytics.sentiment_breakdown.map(item => {
+                  const cfg={
+                    Positive:{c:'#10B981',bg:'rgba(16,185,129,0.08)',bar:'#10B981',e:'😊'},
+                    Negative:{c:'#EF4444',bg:'rgba(239,68,68,0.08)',bar:'#EF4444',e:'😞'},
+                    Neutral:{c:'#6C63FF',bg:'rgba(108,99,255,0.08)',bar:'#6C63FF',e:'😐'},
+                  }[item.sentiment]||{c:'#94A3B8',bg:'rgba(148,163,184,0.08)',bar:'#94A3B8',e:'😶'}
                   return (
-                    <div key={s.sentiment} className="p-3 rounded-xl" style={{ background: bgs[s.sentiment] || 'rgba(108,99,255,0.05)' }}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold" style={{ color: colors[s.sentiment] }}>{s.sentiment}</span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">{s.percentage}%</span>
+                    <div key={item.sentiment} style={{ padding:'11px 13px', borderRadius:10, background:cfg.bg }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}>
+                        <span style={{ fontSize:13, fontWeight:600, color:cfg.c, display:'flex', alignItems:'center', gap:6 }}>
+                          {cfg.e} {item.sentiment}
+                        </span>
+                        <span style={{ fontSize:14, fontWeight:700, color:'#0F172A' }}>{item.percentage}%</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-white/50 dark:bg-black/20 overflow-hidden">
-                        <motion.div className="h-full rounded-full"
-                          initial={{ width: 0 }} animate={{ width: `${s.percentage}%` }}
-                          transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
-                          style={{ background: colors[s.sentiment] }} />
+                      <div style={{ height:5, borderRadius:99, background:'rgba(0,0,0,0.08)', overflow:'hidden' }}>
+                        <motion.div style={{ height:'100%', borderRadius:99, background:cfg.bar }}
+                          initial={{ width:0 }} animate={{ width:`${item.percentage}%` }}
+                          transition={{ duration:1.2, delay:.4 }} />
                       </div>
                     </div>
                   )
                 })}
-                <div className="pt-1 flex justify-between text-xs text-gray-500">
-                  <span>Helpful rate</span>
-                  <span className="font-semibold text-emerald-600">{s?.helpful_feedback_pct ?? 0}%</span>
+                <div style={{ paddingTop:10, borderTop:'1px solid rgba(108,99,255,0.08)',
+                  display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span style={{ fontSize:12, color:'#64748B', display:'flex', alignItems:'center', gap:5 }}>
+                    <CheckCircle2 size={11} color="#10B981" /> Helpful rate
+                  </span>
+                  <span style={{ fontSize:13, fontWeight:700, color:'#10B981' }}>{s?.helpful_feedback_pct??0}%</span>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <MessageSquare size={28} className="text-gray-200 dark:text-gray-700 mb-3" />
-                <p className="text-sm text-gray-400">No sentiment data yet</p>
-                <p className="text-xs text-gray-400 mt-1">Start chatting to see insights</p>
+              <div style={{ textAlign:'center', padding:'24px 0' }}>
+                <div style={{ width:44, height:44, borderRadius:14, margin:'0 auto 12px',
+                  background:'rgba(108,99,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <MessageSquare size={20} color="#6C63FF" style={{ opacity:.5 }} />
+                </div>
+                <p style={{ fontSize:13, fontWeight:500, color:'#64748B', marginBottom:4 }}>No data yet</p>
+                <p style={{ fontSize:12, color:'#94A3B8', marginBottom:14 }}>Start chatting to see insights</p>
+                <Link to="/chat" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px',
+                  background:'linear-gradient(135deg,#6C63FF,#7C3AED)', color:'white', borderRadius:9,
+                  textDecoration:'none', fontSize:13, fontWeight:600 }}>Try Live Chat</Link>
               </div>
             )}
           </motion.div>
 
-          {/* Top questions */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="card">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900 dark:text-white font-display">Top Questions</h3>
-              <Link to="/analytics" className="text-xs text-violet-600 hover:underline">View all</Link>
+          {/* Top Questions */}
+          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:.34 }}
+            style={{ background:'white', borderRadius:16, border:'1px solid rgba(108,99,255,0.09)',
+              boxShadow:'0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(108,99,255,0.06)', padding:20 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+              <p style={{ fontSize:14, fontWeight:700, color:'#0F172A', margin:0,
+                fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Top Questions</p>
+              <Link to="/analytics" style={{ fontSize:12, fontWeight:600, color:'#6C63FF', textDecoration:'none' }}>All →</Link>
             </div>
-            {loading ? (
-              <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="skeleton h-9 rounded-xl" />)}</div>
-            ) : analytics?.top_questions?.length > 0 ? (
-              <div className="space-y-2">
-                {analytics.top_questions.slice(0, 5).map((q, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 + i * 0.05 }}
-                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <span className="text-xs font-bold w-5 text-center flex-shrink-0"
-                      style={{ color: i === 0 ? '#6C63FF' : i === 1 ? '#7C3AED' : '#94A3B8' }}>
-                      #{i+1}
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 flex-1 truncate">{q.question}</p>
-                    <span className="text-xs text-gray-400 flex-shrink-0 font-mono">{q.count}x</span>
+            {loading ? [1,2,3,4].map(i=>(
+              <div key={i} style={{ height:38, borderRadius:9, marginBottom:8,
+                background:'linear-gradient(90deg,#F1F5F9 25%,#E8EDF5 50%,#F1F5F9 75%)',
+                backgroundSize:'400% 100%', animation:'skeleton-wave 1.6s ease infinite' }} />
+            )) : analytics?.top_questions?.length>0 ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                {analytics.top_questions.slice(0,5).map((q,i)=>(
+                  <motion.div key={i} initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }}
+                    transition={{ delay:.5+i*.05 }}
+                    style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 10px', borderRadius:9, transition:'background .15s' }}
+                    onMouseEnter={e=>e.currentTarget.style.background='rgba(108,99,255,0.04)'}
+                    onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <div style={{ width:22, height:22, borderRadius:6, flexShrink:0,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      background:i<3?'rgba(108,99,255,0.1)':'rgba(0,0,0,0.04)',
+                      fontSize:11, fontWeight:700, color:i<3?'#6C63FF':'#94A3B8' }}>{i+1}</div>
+                    <p style={{ fontSize:12, color:'#374151', flex:1,
+                      overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', margin:0 }}>{q.question}</p>
+                    <span style={{ fontSize:11, fontFamily:'monospace', color:'#94A3B8', flexShrink:0 }}>{q.count}×</span>
                   </motion.div>
                 ))}
+                {analytics?.top_failed_queries?.length>0 && (
+                  <div style={{ marginTop:8, padding:'10px 12px', borderRadius:10,
+                    background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.18)',
+                    display:'flex', alignItems:'flex-start', gap:8 }}>
+                    <AlertTriangle size={13} color="#F59E0B" style={{ marginTop:1, flexShrink:0 }} />
+                    <div>
+                      <p style={{ fontSize:12, fontWeight:600, color:'#92400E', margin:'0 0 2px' }}>
+                        {analytics.top_failed_queries.length} unanswered questions
+                      </p>
+                      <p style={{ fontSize:11, color:'#B45309', margin:0 }}>Upload more docs to improve coverage</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <BarChart3 size={28} className="text-gray-200 dark:text-gray-700 mb-3" />
-                <p className="text-sm text-gray-400">No questions yet</p>
-              </div>
-            )}
-
-            {/* Failed queries alert */}
-            {analytics?.top_failed_queries?.length > 0 && (
-              <div className="mt-4 p-3 rounded-xl flex items-start gap-2.5"
-                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                <AlertTriangle size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Knowledge gap detected</p>
-                  <p className="text-xs text-amber-600/70 dark:text-amber-500/70 mt-0.5">
-                    {analytics.top_failed_queries.length} questions couldn't be answered
-                  </p>
-                </div>
+              <div style={{ textAlign:'center', padding:'24px 0' }}>
+                <BarChart3 size={28} color="#CBD5E1" style={{ marginBottom:8 }} />
+                <p style={{ fontSize:13, color:'#94A3B8' }}>Questions appear after first chat</p>
               </div>
             )}
           </motion.div>

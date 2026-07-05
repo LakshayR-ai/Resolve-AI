@@ -4,85 +4,96 @@ import api from '../api/axios'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
 import {
-  Send, ThumbsUp, ThumbsDown, Bot, User, Plus,
-  FileText, ExternalLink, Sparkles, Copy, Check
+  Send, ThumbsUp, ThumbsDown, Bot, User, Plus, FileText,
+  ExternalLink, Sparkles, Copy, Check, RotateCcw, Zap
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
-function TypingIndicator() {
+const SKL = 'linear-gradient(90deg,#F1F5F9 25%,#E8EDF5 50%,#F1F5F9 75%)'
+
+function TypingDots() {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-end gap-3">
-      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.15), rgba(124,58,237,0.15))' }}>
-        <Bot size={15} style={{ color: '#6C63FF' }} />
+    <div style={{ display:'flex', alignItems:'flex-end', gap:10 }}>
+      <div style={{ width:32,height:32,borderRadius:'50%',flexShrink:0,
+        background:'linear-gradient(135deg,rgba(108,99,255,.15),rgba(124,58,237,.1))',
+        display:'flex',alignItems:'center',justifyContent:'center' }}>
+        <Bot size={15} color="#6C63FF" />
       </div>
-      <div className="px-4 py-3 rounded-2xl rounded-bl-sm"
-        style={{ background: 'white', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <div className="flex gap-1.5 items-center h-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
+      <div style={{ padding:'12px 16px', borderRadius:'18px 18px 18px 4px',
+        background:'white', border:'1px solid rgba(108,99,255,.1)',
+        boxShadow:'0 2px 8px rgba(0,0,0,.06)' }}>
+        <div style={{ display:'flex', gap:5, alignItems:'center', height:16 }}>
+          {[0,1,2].map(i => (
+            <div key={i} className="typing-dot" style={{ width:7,height:7,borderRadius:'50%',
+              background:'#94A3B8', animationDelay:`${i*.18}s` }} />
+          ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
-function CopyButton({ text }) {
-  const [copied, setCopied] = useState(false)
-  const copy = () => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+function CopyBtn({ text }) {
+  const [c, setC] = useState(false)
   return (
-    <button onClick={copy}
-      className="p-1 rounded transition-colors text-gray-400 hover:text-gray-600">
-      {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+    <button onClick={() => { navigator.clipboard.writeText(text); setC(true); setTimeout(()=>setC(false),2000) }}
+      style={{ padding:5, borderRadius:6, border:'none', background:'none', cursor:'pointer',
+        color: c ? '#10B981' : '#94A3B8', transition:'color .15s', display:'flex' }}>
+      {c ? <Check size={13}/> : <Copy size={13}/>}
     </button>
   )
 }
 
-function Message({ msg, onFeedback }) {
+function Msg({ msg, onFeedback }) {
   const isUser = msg.role === 'user'
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      className={clsx('flex items-end gap-3', isUser && 'flex-row-reverse')}>
-      <div className={clsx('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',)}
-        style={isUser
-          ? { background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }
-          : { background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(124,58,237,0.08))' }}>
-        {isUser
-          ? <User size={14} className="text-white" />
-          : <Bot size={14} style={{ color: '#6C63FF' }} />
-        }
+    <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
+      style={{ display:'flex', alignItems:'flex-end', gap:10,
+        flexDirection: isUser ? 'row-reverse' : 'row' }}>
+      <div style={{ width:32,height:32,borderRadius:'50%',flexShrink:0,
+        background: isUser
+          ? 'linear-gradient(135deg,#6C63FF,#7C3AED)'
+          : 'linear-gradient(135deg,rgba(108,99,255,.15),rgba(124,58,237,.1))',
+        display:'flex',alignItems:'center',justifyContent:'center',
+        boxShadow: isUser ? '0 2px 8px rgba(108,99,255,.3)' : 'none' }}>
+        {isUser ? <User size={14} color="white"/> : <Bot size={14} color="#6C63FF"/>}
       </div>
 
-      <div className={clsx('max-w-[76%] flex flex-col gap-1.5', isUser ? 'items-end' : 'items-start')}>
-        <div className={clsx('relative px-4 py-3 rounded-2xl text-sm leading-relaxed group')}
-          style={isUser
-            ? { background: 'linear-gradient(135deg, #6C63FF, #7C3AED)', color: 'white', borderRadius: '18px 18px 4px 18px', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }
-            : { background: 'white', color: '#111827', borderRadius: '18px 18px 18px 4px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }
-          }>
-          <p className="whitespace-pre-wrap">{msg.content}</p>
+      <div style={{ maxWidth:'74%', display:'flex', flexDirection:'column',
+        gap:5, alignItems: isUser ? 'flex-end' : 'flex-start' }}>
+        <div style={{ position:'relative',
+          padding:'11px 16px', fontSize:14, lineHeight:1.65,
+          borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+          background: isUser
+            ? 'linear-gradient(135deg,#6C63FF,#7C3AED)'
+            : 'white',
+          color: isUser ? 'white' : '#111827',
+          boxShadow: isUser
+            ? '0 4px 14px rgba(108,99,255,.3)'
+            : '0 2px 8px rgba(0,0,0,.06)',
+          border: isUser ? 'none' : '1px solid rgba(108,99,255,.09)',
+          whiteSpace:'pre-wrap', wordBreak:'break-word' }}>
+          {msg.content}
           {!isUser && (
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <CopyButton text={msg.content} />
+            <div style={{ position:'absolute', top:6, right:8, opacity:0, transition:'opacity .15s' }}
+              onMouseEnter={e=>e.currentTarget.style.opacity='1'}
+              onMouseLeave={e=>e.currentTarget.style.opacity='0'}
+              className="copy-reveal">
+              <CopyBtn text={msg.content} />
             </div>
           )}
         </div>
 
         {/* Sources */}
         {!isUser && msg.sources?.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {msg.sources.map((s, i) => (
-              <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-                style={{ background: 'rgba(108,99,255,0.08)', color: '#6C63FF', border: '1px solid rgba(108,99,255,0.15)' }}>
-                <FileText size={9} />
-                {s.split('/').pop() || `Source ${i+1}`}
+          <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+            {msg.sources.map((src,i) => (
+              <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:4,
+                padding:'2px 9px', borderRadius:99, fontSize:11, fontWeight:500,
+                background:'rgba(108,99,255,.07)', color:'#6C63FF',
+                border:'1px solid rgba(108,99,255,.15)' }}>
+                <FileText size={9}/> {src.split('/').pop() || `Source ${i+1}`}
               </span>
             ))}
           </div>
@@ -90,25 +101,24 @@ function Message({ msg, onFeedback }) {
 
         {/* Feedback */}
         {!isUser && msg.id && (
-          <div className="flex items-center gap-1 px-1">
+          <div style={{ display:'flex', alignItems:'center', gap:6, paddingLeft:2 }}>
             {msg.category && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium"
-                style={{ background: 'rgba(108,99,255,0.06)', color: '#6C63FF' }}>
-                {msg.category}
-              </span>
+              <span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:500,
+                background:'rgba(108,99,255,.07)', color:'#6C63FF' }}>{msg.category}</span>
             )}
-            <button onClick={() => onFeedback(msg.id, 'helpful')}
-              className={clsx('p-1.5 rounded-lg transition-all', msg.feedback === 'helpful'
-                ? 'bg-emerald-50 text-emerald-500' : 'text-gray-300 hover:text-emerald-500 hover:bg-emerald-50')}>
-              <ThumbsUp size={12} />
-            </button>
-            <button onClick={() => onFeedback(msg.id, 'not_helpful')}
-              className={clsx('p-1.5 rounded-lg transition-all', msg.feedback === 'not_helpful'
-                ? 'bg-red-50 text-red-500' : 'text-gray-300 hover:text-red-500 hover:bg-red-50')}>
-              <ThumbsDown size={12} />
-            </button>
+            {[{k:'helpful',Icon:ThumbsUp,c:'#10B981'},{k:'not_helpful',Icon:ThumbsDown,c:'#EF4444'}].map(({k,Icon,c})=>(
+              <button key={k} onClick={()=>onFeedback(msg.id,k)}
+                style={{ padding:5, borderRadius:7, border:'none', cursor:'pointer',
+                  background: msg.feedback===k ? `${c}18` : 'none',
+                  color: msg.feedback===k ? c : '#CBD5E1',
+                  display:'flex', transition:'all .15s' }}>
+                <Icon size={12}/>
+              </button>
+            ))}
             {msg.response_time_ms && (
-              <span className="text-[10px] text-gray-300 ml-1">{msg.response_time_ms}ms</span>
+              <span style={{ fontSize:10, color:'#CBD5E1', fontFamily:'monospace' }}>
+                {msg.response_time_ms}ms
+              </span>
             )}
           </div>
         )}
@@ -118,114 +128,122 @@ function Message({ msg, onFeedback }) {
 }
 
 const SUGGESTIONS = [
-  'What services do you offer?',
-  'How do I get started?',
-  'What is your pricing?',
-  'How do I contact support?',
+  'What services do you offer?','How do I get started?',
+  'What is your pricing?','How do I contact support?'
 ]
 
 export default function Chat() {
   const { user } = useAuth()
-  const [messages,  setMessages]  = useState([])
-  const [input,     setInput]     = useState('')
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
   const [sessionId, setSessionId] = useState(null)
-  const [loading,   setLoading]   = useState(false)
+  const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
-  const inputRef  = useRef(null)
+  const inputRef = useRef(null)
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
+  useEffect(()=>{ bottomRef.current?.scrollIntoView({ behavior:'smooth' }) },[messages,loading])
 
-  const newSession = () => {
-    setMessages([])
-    setSessionId(null)
-    toast('New session started', { icon: '💬' })
-    inputRef.current?.focus()
-  }
+  const newSession = () => { setMessages([]); setSessionId(null); toast('New session', { icon:'💬' }); inputRef.current?.focus() }
 
   const send = async (text) => {
-    const msg = (text || input).trim()
+    const msg = (text||input).trim()
     if (!msg || loading) return
     setInput('')
-    setMessages(m => [...m, { role: 'user', content: msg }])
+    setMessages(m => [...m, { role:'user', content:msg }])
     setLoading(true)
     try {
-      const { data } = await api.post('/chat/', { message: msg, session_id: sessionId })
+      const { data } = await api.post('/chat/', { message:msg, session_id:sessionId })
       setSessionId(data.session_id)
       setMessages(m => [...m, {
-        id: data.message_id, role: 'assistant', content: data.answer,
-        category: data.category, sources: data.sources || [],
-        response_time_ms: data.response_time_ms, feedback: null,
+        id:data.message_id, role:'assistant', content:data.answer,
+        category:data.category, sources:data.sources||[], response_time_ms:data.response_time_ms, feedback:null
       }])
-    } catch {
-      toast.error('Failed to send. Please try again.')
-      setMessages(m => m.slice(0, -1))
-    } finally {
-      setLoading(false)
-      inputRef.current?.focus()
-    }
+    } catch { toast.error('Failed to send'); setMessages(m=>m.slice(0,-1)) }
+    finally { setLoading(false); inputRef.current?.focus() }
   }
 
-  const handleFeedback = async (id, feedback) => {
+  const handleFeedback = async (id,feedback) => {
     try {
-      await api.post('/chat/feedback', { message_id: id, feedback })
-      setMessages(m => m.map(msg => msg.id === id ? { ...msg, feedback } : msg))
-      toast.success(feedback === 'helpful' ? '👍 Thanks!' : '👎 Got it!')
+      await api.post('/chat/feedback', { message_id:id, feedback })
+      setMessages(m=>m.map(msg=>msg.id===id?{...msg,feedback}:msg))
+      toast.success(feedback==='helpful'?'👍 Thanks!':'👎 Got it!')
     } catch { toast.error('Feedback failed') }
   }
 
   return (
     <Layout>
-      <div className="flex flex-col h-screen">
+      <style>{`
+        .copy-reveal:hover { opacity:1!important; }
+        div:hover > .copy-reveal { opacity:1; }
+        @keyframes skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
+      `}</style>
+      <div style={{ display:'flex', flexDirection:'column', height:'100vh' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0"
-          style={{ background: 'white', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(124,58,237,0.08))' }}>
-              <Sparkles size={16} style={{ color: '#6C63FF' }} />
+        <div style={{ background:'rgba(255,255,255,0.92)', backdropFilter:'blur(16px)',
+          borderBottom:'1px solid rgba(108,99,255,0.08)',
+          boxShadow:'0 1px 8px rgba(108,99,255,0.05)',
+          padding:'14px 24px', flexShrink:0,
+          display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ width:36,height:36,borderRadius:10,
+              background:'linear-gradient(135deg,rgba(108,99,255,.1),rgba(124,58,237,.07))',
+              display:'flex',alignItems:'center',justifyContent:'center' }}>
+              <Sparkles size={16} color="#6C63FF"/>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900 font-display">{user?.company_name} AI</p>
-              <p className="text-[11px] text-gray-400">
+              <p style={{ fontSize:14, fontWeight:600, color:'#0F172A', margin:0 }}>{user?.company_name} AI</p>
+              <p style={{ fontSize:11, color:'#94A3B8', margin:0 }}>
                 {sessionId ? `Session · ${sessionId.slice(0,8)}…` : 'Ready to help'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display:'flex', gap:8 }}>
             <a href={`/chat/${user?.company_slug}`} target="_blank" rel="noreferrer"
-              className="btn-ghost text-xs flex items-center gap-1.5">
-              <ExternalLink size={13} /> Customer view
+              style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'7px 12px',
+                background:'transparent', border:'1px solid #E5E7EB', borderRadius:9,
+                textDecoration:'none', fontSize:12, color:'#64748B', cursor:'pointer', fontWeight:500 }}>
+              <ExternalLink size={12}/> Customer view
             </a>
-            <button onClick={newSession} className="btn-secondary text-xs flex items-center gap-1.5">
-              <Plus size={13} /> New chat
+            <button onClick={newSession}
+              style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'7px 12px',
+                background:'white', border:'1px solid #E5E7EB', borderRadius:9,
+                fontSize:12, color:'#374151', cursor:'pointer', fontWeight:500 }}>
+              <Plus size={12}/> New chat
             </button>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5"
-          style={{ background: '#F8FAFC' }}>
-
+        <div style={{ flex:1, overflowY:'auto', padding:'24px',
+          background:'linear-gradient(180deg,#F8FAFC 0%,#F1F5FF 100%)' }}>
           <AnimatePresence>
-            {messages.length === 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center h-full text-center pt-16">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
-                  style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(124,58,237,0.08))' }}>
-                  <Sparkles size={28} style={{ color: '#6C63FF' }} />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 font-display">How can I help?</h3>
-                <p className="text-sm text-gray-500 max-w-sm mb-8 leading-relaxed">
+            {messages.length===0 && (
+              <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
+                style={{ display:'flex', flexDirection:'column', alignItems:'center',
+                  justifyContent:'center', height:'100%', textAlign:'center', paddingTop:60 }}>
+                <motion.div whileHover={{ scale:1.05 }}
+                  style={{ width:64,height:64,borderRadius:18,marginBottom:20,
+                    background:'linear-gradient(135deg,rgba(108,99,255,.1),rgba(124,58,237,.07))',
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    boxShadow:'0 8px 24px rgba(108,99,255,.15)' }}>
+                  <Sparkles size={28} color="#6C63FF"/>
+                </motion.div>
+                <h3 style={{ fontSize:20,fontWeight:700,color:'#0F172A',marginBottom:8,
+                  fontFamily:"'Plus Jakarta Sans',sans-serif",letterSpacing:'-0.02em' }}>
+                  How can I help?
+                </h3>
+                <p style={{ fontSize:14,color:'#64748B',maxWidth:380,lineHeight:1.65,marginBottom:28 }}>
                   I answer from your knowledge base. Ask anything about {user?.company_name}.
                 </p>
-                <div className="flex flex-wrap justify-center gap-2 max-w-md">
-                  {SUGGESTIONS.map(q => (
-                    <motion.button key={q} onClick={() => send(q)}
-                      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                      className="text-xs px-4 py-2 rounded-full transition-all font-medium"
-                      style={{ background: 'white', border: '1px solid rgba(108,99,255,0.2)', color: '#6C63FF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:9, justifyContent:'center', maxWidth:480 }}>
+                  {SUGGESTIONS.map(q=>(
+                    <motion.button key={q} onClick={()=>send(q)}
+                      whileHover={{ scale:1.02 }} whileTap={{ scale:.98 }}
+                      style={{ padding:'8px 16px', borderRadius:99, border:'1px solid rgba(108,99,255,.2)',
+                        background:'white', color:'#6C63FF', fontSize:13, fontWeight:500,
+                        cursor:'pointer', boxShadow:'0 1px 4px rgba(0,0,0,.04)',
+                        fontFamily:'inherit', transition:'all .15s' }}>
                       {q}
                     </motion.button>
                   ))}
@@ -234,43 +252,47 @@ export default function Chat() {
             )}
           </AnimatePresence>
 
-          {messages.map((msg, i) => (
-            <Message key={i} msg={msg} onFeedback={handleFeedback} />
-          ))}
-
-          {loading && <TypingIndicator />}
-          <div ref={bottomRef} />
+          <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:760, margin:'0 auto' }}>
+            {messages.map((m,i) => <Msg key={i} msg={m} onFeedback={handleFeedback}/>)}
+            {loading && <TypingDots/>}
+            <div ref={bottomRef}/>
+          </div>
         </div>
 
         {/* Input */}
-        <div className="px-6 py-4 flex-shrink-0"
-          style={{ background: 'white', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <form onSubmit={e => { e.preventDefault(); send() }}
-            className="flex gap-3 p-1 rounded-2xl"
-            style={{ background: '#F8FAFC', border: '1.5px solid rgba(108,99,255,0.2)', boxShadow: '0 0 0 3px rgba(108,99,255,0.04)' }}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              className="flex-1 px-4 py-2.5 text-sm bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="Ask anything about your company…"
-              disabled={loading}
-            />
-            <motion.button type="submit" disabled={loading || !input.trim()}
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0 transition-opacity disabled:opacity-40"
-              style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-              {loading
-                ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                : <Send size={15} className="text-white" />
-              }
-            </motion.button>
-          </form>
-          <p className="text-center text-[11px] text-gray-400 mt-2">
-            Powered by Gemini 2.5 Flash · RAG · Only answers from your documents
-          </p>
+        <div style={{ padding:'16px 24px', background:'white',
+          borderTop:'1px solid rgba(108,99,255,.08)',
+          boxShadow:'0 -4px 20px rgba(108,99,255,.06)', flexShrink:0 }}>
+          <div style={{ maxWidth:760, margin:'0 auto' }}>
+            <form onSubmit={e=>{ e.preventDefault(); send() }}
+              style={{ display:'flex', gap:10, padding:'10px 12px', borderRadius:16,
+                background:'#F8FAFC', border:'1.5px solid rgba(108,99,255,.18)',
+                boxShadow:'0 2px 12px rgba(108,99,255,.08)' }}>
+              <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
+                disabled={loading} placeholder="Ask anything about your company…"
+                style={{ flex:1, padding:'6px 8px', fontSize:14, background:'transparent',
+                  border:'none', outline:'none', color:'#0F172A', fontFamily:'inherit' }} />
+              <motion.button type="submit" disabled={loading||!input.trim()}
+                whileHover={{ scale:1.05 }} whileTap={{ scale:.95 }}
+                style={{ width:38,height:38,borderRadius:10,border:'none',cursor:'pointer',
+                  background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  boxShadow:'0 4px 12px rgba(108,99,255,.35)',
+                  opacity:(loading||!input.trim())?.4:1, flexShrink:0 }}>
+                {loading
+                  ? <div style={{ width:14,height:14,borderRadius:'50%',
+                      border:'2px solid rgba(255,255,255,.4)',borderTopColor:'white',
+                      animation:'spin 1s linear infinite' }}/>
+                  : <Send size={15} color="white"/>}
+              </motion.button>
+            </form>
+            <p style={{ textAlign:'center', fontSize:11, color:'#94A3B8', marginTop:8 }}>
+              Powered by Gemini 2.5 Flash · RAG · Answers only from your documents
+            </p>
+          </div>
         </div>
       </div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </Layout>
   )
 }

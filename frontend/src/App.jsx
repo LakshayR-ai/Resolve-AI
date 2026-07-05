@@ -3,15 +3,16 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
-import Login from './pages/Login'
-import Register from './pages/Register'
+import Landing   from './pages/Landing'
+import Login     from './pages/Login'
+import Register  from './pages/Register'
 import Dashboard from './pages/Dashboard'
-import Chat from './pages/Chat'
+import Chat      from './pages/Chat'
 import Documents from './pages/Documents'
 import Analytics from './pages/Analytics'
-import Settings from './pages/Settings'
-import Admin from './pages/Admin'
-import History from './pages/History'
+import Settings  from './pages/Settings'
+import Admin     from './pages/Admin'
+import History   from './pages/History'
 import PublicChat from './pages/PublicChat'
 
 export default function App() {
@@ -23,24 +24,31 @@ export default function App() {
             position="top-right"
             toastOptions={{
               duration: 3500,
-              style: { borderRadius: '12px', fontSize: '14px' },
+              style: {
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: '500',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              },
             }}
           />
           <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/chat/:slug" element={<PublicChat />} />
+            {/* Public */}
+            <Route path="/"            element={<Landing />} />
+            <Route path="/login"       element={<Login />} />
+            <Route path="/register"    element={<Register />} />
+            <Route path="/chat/:slug"  element={<PublicChat />} />
 
-            {/* Protected routes */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-            <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-            <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            {/* Protected */}
+            <Route path="/dashboard"   element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/chat"        element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/history"     element={<ProtectedRoute><History /></ProtectedRoute>} />
+            <Route path="/documents"   element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+            <Route path="/analytics"   element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/admin"       element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+
+            <Route path="*"            element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

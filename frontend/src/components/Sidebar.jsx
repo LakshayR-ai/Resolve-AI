@@ -1,187 +1,232 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
-import { motion } from 'framer-motion'
 import {
-  LayoutDashboard, MessageSquare, FileText, BarChart3,
-  Settings, LogOut, Sun, Moon, Bot, Shield, History,
-  ChevronRight, Sparkles, Zap
+  LayoutDashboard, MessageSquare, FileText, BarChart3, Settings,
+  LogOut, Sun, Moon, Bot, Shield, History, Sparkles,
+  ChevronLeft, ChevronRight, ExternalLink
 } from 'lucide-react'
-import clsx from 'clsx'
 
-const navItems = [
-  { to: '/dashboard',  label: 'Dashboard',     icon: LayoutDashboard, desc: 'Overview' },
-  { to: '/chat',       label: 'Live Chat',      icon: MessageSquare,   desc: 'AI Assistant' },
-  { to: '/history',    label: 'Chat History',   icon: History,          desc: 'Conversations' },
-  { to: '/documents',  label: 'Knowledge Base', icon: FileText,         desc: 'Documents' },
-  { to: '/analytics',  label: 'Analytics',      icon: BarChart3,        desc: 'Insights' },
-  { to: '/settings',   label: 'Settings',       icon: Settings,         desc: 'Configure' },
+const NAV = [
+  { to:'/dashboard',  label:'Dashboard',     icon:LayoutDashboard },
+  { to:'/chat',       label:'Live Chat',      icon:MessageSquare,  badge:null },
+  { to:'/history',    label:'Chat History',   icon:History         },
+  { to:'/documents',  label:'Knowledge Base', icon:FileText        },
+  { to:'/analytics',  label:'Analytics',      icon:BarChart3       },
+  { to:'/settings',   label:'Settings',       icon:Settings        },
 ]
-
-const sidebarVariants = {
-  hidden: { x: -20, opacity: 0 },
-  show:   { x: 0,   opacity: 1, transition: { staggerChildren: 0.05 } }
-}
-
-const itemVariants = {
-  hidden: { x: -12, opacity: 0 },
-  show:   { x: 0,   opacity: 1 }
-}
 
 export default function Sidebar() {
   const { user, logout } = useAuth()
   const { dark, toggle } = useTheme()
   const navigate = useNavigate()
-
-  const handleLogout = () => { logout(); navigate('/login') }
+  const [collapsed, setCollapsed] = useState(false)
+  const W = collapsed ? 68 : 240
 
   const initial = user?.full_name?.[0]?.toUpperCase() || 'U'
 
   return (
     <motion.aside
-      initial="hidden" animate="show" variants={sidebarVariants}
-      className="w-[260px] flex-shrink-0 flex flex-col h-screen sticky top-0 z-40"
-      style={{
-        background: dark ? '#0F172A' : 'white',
-        borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-      }}
-    >
-      {/* Logo */}
-      <div className="px-5 pt-6 pb-5">
-        <motion.div variants={itemVariants} className="flex items-center gap-3 mb-5">
-          <div className="relative">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-              <Bot size={18} className="text-white" />
-            </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white dark:border-gray-900" />
-          </div>
-          <div>
-            <p className="font-bold text-gray-900 dark:text-white text-sm tracking-tight font-display">
-              Resolve<span className="gradient-text">AI</span>
-            </p>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate max-w-[140px]">
-              {user?.company_name || 'Workspace'}
-            </p>
-          </div>
-        </motion.div>
+      animate={{ width: W }}
+      transition={{ duration:.25, ease:[.4,0,.2,1] }}
+      style={{ width:W, flexShrink:0, background:'#0B0F1A',
+        borderRight:'1px solid rgba(255,255,255,0.06)',
+        display:'flex', flexDirection:'column', height:'100vh',
+        position:'sticky', top:0, zIndex:50, overflow:'hidden' }}>
 
-        {/* Workspace pill */}
-        <motion.div variants={itemVariants}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all"
-          style={{ background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(108,99,255,0.06)', border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(108,99,255,0.12)' }}>
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-            {initial}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.company_name}</p>
-            <p className="text-[10px] text-gray-400 capitalize">{user?.role?.replace('_', ' ')}</p>
-          </div>
-          <ChevronRight size={13} className="text-gray-400 flex-shrink-0" />
-        </motion.div>
+      {/* ambient */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:200, pointerEvents:'none',
+        background:'radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.18) 0%, transparent 70%)' }} />
+
+      {/* BRAND */}
+      <div style={{ padding:'20px 14px 16px', position:'relative', flexShrink:0,
+        borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, justifyContent:collapsed?'center':'flex-start' }}>
+          <motion.div whileHover={{ scale:1.05 }} style={{ position:'relative', flexShrink:0 }}>
+            <div style={{ width:34, height:34, borderRadius:9,
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(108,99,255,0.4)' }}>
+              <Bot size={17} color="white" />
+            </div>
+            <span style={{ position:'absolute', bottom:-1, right:-1, width:9, height:9, borderRadius:'50%',
+              background:'#10B981', border:'2px solid #0B0F1A',
+              boxShadow:'0 0 0 0 rgba(16,185,129,0.4)', animation:'pulse-green 2s infinite' }} />
+          </motion.div>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-10 }}
+                transition={{ duration:.2 }}>
+                <p style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:16,
+                  color:'white', letterSpacing:'-0.03em', lineHeight:1 }}>
+                  Resolve<span style={{ background:'linear-gradient(135deg,#A78BFA,#818CF8)',
+                    WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent',
+                    backgroundClip:'text' }}>AI</span>
+                </p>
+                <p style={{ fontSize:10, color:'rgba(255,255,255,0.3)', marginTop:1 }}>AI Support Platform</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Collapse toggle */}
+        <button onClick={() => setCollapsed(c=>!c)}
+          style={{ position:'absolute', right:-1, top:'50%', transform:'translateY(-50%)',
+            width:20, height:20, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.12)',
+            background:'#1a1f32', display:'flex', alignItems:'center', justifyContent:'center',
+            cursor:'pointer', color:'rgba(255,255,255,0.5)', zIndex:10, padding:0 }}>
+          {collapsed ? <ChevronRight size={12}/> : <ChevronLeft size={12}/>}
+        </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto pb-2">
-        <p className="px-3 pt-1 pb-2 text-[10px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
-          Navigation
-        </p>
+      {/* Workspace pill */}
+      <AnimatePresence>
+        {!collapsed && (
+          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+            style={{ margin:'12px 12px 4px', padding:'10px 12px', borderRadius:10,
+              background:'rgba(108,99,255,0.12)', border:'1px solid rgba(108,99,255,0.2)',
+              display:'flex', alignItems:'center', gap:9, cursor:'pointer' }}>
+            <div style={{ width:26, height:26, borderRadius:8, flexShrink:0,
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:12, fontWeight:700, color:'white' }}>{initial}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <p style={{ fontSize:12, fontWeight:600, color:'white',
+                overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', margin:0 }}>
+                {user?.company_name}
+              </p>
+              <p style={{ fontSize:10, color:'rgba(255,255,255,0.35)', margin:0, textTransform:'capitalize' }}>
+                {user?.role?.replace('_',' ')}
+              </p>
+            </div>
+            <ExternalLink size={12} color="rgba(255,255,255,0.3)" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {navItems.map(({ to, label, icon: Icon }, i) => (
-          <motion.div key={to} variants={itemVariants}>
-            <NavLink to={to}>
+      {/* NAV */}
+      <nav style={{ flex:1, padding:'8px 10px', overflowY:'auto', overflowX:'hidden' }}>
+        {!collapsed && (
+          <p style={{ padding:'6px 10px 8px', fontSize:10, fontWeight:700,
+            color:'rgba(255,255,255,0.2)', textTransform:'uppercase', letterSpacing:'0.1em' }}>
+            Menu
+          </p>
+        )}
+
+        <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+          {NAV.map(({ to, label, icon:Icon }) => (
+            <NavLink key={to} to={to} style={{ textDecoration:'none', display:'block' }}>
               {({ isActive }) => (
-                <div className={clsx(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group cursor-pointer',
-                  isActive
-                    ? 'text-violet-700 dark:text-violet-300'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                )}
-                  style={isActive ? {
-                    background: dark ? 'rgba(108,99,255,0.15)' : 'rgba(108,99,255,0.08)',
-                  } : {}}>
-                  <div className={clsx(
-                    'w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all',
-                    isActive
-                      ? 'text-violet-600 dark:text-violet-400'
-                      : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                  )}>
-                    <Icon size={16} />
+                <div style={{ display:'flex', alignItems:'center', gap:collapsed?0:10,
+                  padding:collapsed?'10px':'9px 10px', borderRadius:10,
+                  justifyContent:collapsed?'center':'flex-start',
+                  background:isActive?'rgba(108,99,255,0.2)':'transparent',
+                  color:isActive?'#C4B5FD':'rgba(255,255,255,0.45)',
+                  cursor:'pointer', transition:'all .15s ease', position:'relative',
+                  boxShadow:isActive?'inset 0 0 0 1px rgba(108,99,255,0.25)':'none' }}
+                  onMouseEnter={e=>{ if(!isActive){e.currentTarget.style.background='rgba(255,255,255,0.07)'; e.currentTarget.style.color='rgba(255,255,255,0.85)'} }}
+                  onMouseLeave={e=>{ if(!isActive){e.currentTarget.style.background='transparent'; e.currentTarget.style.color='rgba(255,255,255,0.45)'} }}>
+                  <div style={{ width:28, height:28, borderRadius:7, display:'flex',
+                    alignItems:'center', justifyContent:'center', flexShrink:0,
+                    background:isActive?'rgba(108,99,255,0.3)':'transparent' }}>
+                    <Icon size={15} />
                   </div>
-                  <span className="flex-1">{label}</span>
-                  {isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                  <AnimatePresence>
+                    {!collapsed && (
+                      <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                        style={{ fontSize:13.5, fontWeight:500, flex:1 }}>{label}</motion.span>
+                    )}
+                  </AnimatePresence>
+                  {isActive && !collapsed && (
+                    <div style={{ width:5, height:5, borderRadius:'50%', background:'#A78BFA', flexShrink:0 }} />
                   )}
                 </div>
               )}
             </NavLink>
-          </motion.div>
-        ))}
+          ))}
 
-        {user?.role === 'admin' && (
-          <motion.div variants={itemVariants}>
-            <NavLink to="/admin">
+          {user?.role === 'admin' && (
+            <NavLink to="/admin" style={{ textDecoration:'none', display:'block' }}>
               {({ isActive }) => (
-                <div className={clsx(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer',
-                  isActive
-                    ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
-                )}>
-                  <Shield size={16} className="flex-shrink-0" />
-                  Super Admin
+                <div style={{ display:'flex', alignItems:'center', gap:collapsed?0:10,
+                  padding:collapsed?'10px':'9px 10px', borderRadius:10,
+                  justifyContent:collapsed?'center':'flex-start',
+                  background:isActive?'rgba(245,158,11,0.15)':'transparent',
+                  color:isActive?'#FCD34D':'rgba(255,255,255,0.4)',
+                  cursor:'pointer', transition:'all .15s ease' }}
+                  onMouseEnter={e=>{ if(!isActive){e.currentTarget.style.background='rgba(255,255,255,0.07)'; e.currentTarget.style.color='rgba(255,255,255,0.8)'} }}
+                  onMouseLeave={e=>{ if(!isActive){e.currentTarget.style.background='transparent'; e.currentTarget.style.color='rgba(255,255,255,0.4)'} }}>
+                  <div style={{ width:28, height:28, borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <Shield size={15} />
+                  </div>
+                  <AnimatePresence>
+                    {!collapsed && <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} style={{ fontSize:13.5, fontWeight:500 }}>Admin Panel</motion.span>}
+                  </AnimatePresence>
                 </div>
               )}
             </NavLink>
-          </motion.div>
-        )}
-
-        {/* AI badge */}
-        <motion.div variants={itemVariants} className="pt-4">
-          <div className="mx-1 p-3 rounded-xl"
-            style={{ background: dark ? 'rgba(108,99,255,0.08)' : 'rgba(108,99,255,0.05)', border: '1px solid rgba(108,99,255,0.15)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={13} className="text-violet-500" />
-              <span className="text-xs font-semibold text-violet-700 dark:text-violet-400">AI Powered</span>
-            </div>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-              Gemini 2.5 Flash · RAG · ChromaDB
-            </p>
-          </div>
-        </motion.div>
-      </nav>
-
-      {/* Footer */}
-      <div className="px-3 py-4"
-        style={{ borderTop: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
-        {/* User row */}
-        <div className="flex items-center gap-3 px-2 py-2 mb-2 rounded-xl">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-            {initial}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{user?.full_name}</p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
-          </div>
+          )}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-1.5">
+        {/* AI badge */}
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+              style={{ margin:'16px 2px 0', padding:'12px', borderRadius:10,
+                background:'rgba(108,99,255,0.08)', border:'1px solid rgba(108,99,255,0.18)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:5 }}>
+                <Sparkles size={12} color="#A78BFA" />
+                <span style={{ fontSize:12, fontWeight:600, color:'#C4B5FD' }}>AI Powered</span>
+              </div>
+              <p style={{ fontSize:11, color:'rgba(255,255,255,0.28)', lineHeight:1.5, margin:0 }}>
+                Gemini 2.5 Flash · RAG · ChromaDB
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* FOOTER */}
+      <div style={{ padding:'10px', borderTop:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
+        {!collapsed && (
+          <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', marginBottom:8 }}>
+            <div style={{ width:30, height:30, borderRadius:'50%', flexShrink:0,
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:12, fontWeight:700, color:'white' }}>{initial}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <p style={{ fontSize:12, fontWeight:600, color:'white',
+                overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', margin:0 }}>{user?.full_name}</p>
+              <p style={{ fontSize:10, color:'rgba(255,255,255,0.28)', margin:0,
+                overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.email}</p>
+            </div>
+          </div>
+        )}
+        <div style={{ display:'flex', gap:6, justifyContent:collapsed?'center':'stretch' }}>
           <button onClick={toggle}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all"
-            style={{ background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: dark ? '#94A3B8' : '#6B7280' }}>
-            {dark ? <Sun size={13} /> : <Moon size={13} />}
-            {dark ? 'Light' : 'Dark'}
+            style={{ flex:collapsed?'none':1, padding:'7px', borderRadius:9, border:'none', cursor:'pointer',
+              background:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.5)',
+              display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+              fontSize:12, fontWeight:500, transition:'all .15s', fontFamily:'inherit' }}
+            onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,0.12)'; e.currentTarget.style.color='rgba(255,255,255,0.85)'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.07)'; e.currentTarget.style.color='rgba(255,255,255,0.5)'}}>
+            {dark ? <Sun size={14}/> : <Moon size={14}/>}
+            {!collapsed && (dark?'Light':'Dark')}
           </button>
-          <button onClick={handleLogout}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30">
-            <LogOut size={13} />
-            Logout
+          <button onClick={()=>{ logout(); navigate('/login') }}
+            style={{ flex:collapsed?'none':1, padding:'7px', borderRadius:9, border:'none', cursor:'pointer',
+              background:'rgba(239,68,68,0.1)', color:'rgba(252,165,165,0.7)',
+              display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+              fontSize:12, fontWeight:500, transition:'all .15s', fontFamily:'inherit' }}
+            onMouseEnter={e=>{e.currentTarget.style.background='rgba(239,68,68,0.2)'; e.currentTarget.style.color='#FCA5A5'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(239,68,68,0.1)'; e.currentTarget.style.color='rgba(252,165,165,0.7)'}}>
+            <LogOut size={14}/> {!collapsed && 'Logout'}
           </button>
         </div>
       </div>
+      <style>{`@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 5px rgba(16,185,129,0)}}`}</style>
     </motion.aside>
   )
 }

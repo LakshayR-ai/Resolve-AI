@@ -3,14 +3,13 @@ import Sidebar from './Sidebar'
 
 export default function Layout({ children }) {
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A]">
+    <div style={{ display:'flex', minHeight:'100vh', background:'#F8FAFC' }}>
       <Sidebar />
       <motion.main
-        className="flex-1 overflow-auto min-w-0"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
+        style={{ flex:1, overflow:'auto', minWidth:0 }}
+        initial={{ opacity:0, y:6 }}
+        animate={{ opacity:1, y:0 }}
+        transition={{ duration:.3, ease:[.4,0,.2,1] }}>
         {children}
       </motion.main>
     </div>

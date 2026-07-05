@@ -2,19 +2,18 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react'
+import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
+const fade = { hidden:{ opacity:0, y:20 }, show:{ opacity:1, y:0 } }
+const stag = { hidden:{}, show:{ transition:{ staggerChildren:.08 } } }
 
 export default function Login() {
   const { login, loading } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [showPass, setShowPass] = useState(false)
-
-  const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+  const [form, setForm] = useState({ email:'', password:'' })
+  const [show, setShow] = useState(false)
+  const set = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
   const submit = async e => {
     e.preventDefault()
@@ -24,121 +23,156 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0F172A' }}>
-      {/* Left — branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12">
-        {/* Gradient orbs */}
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #6C63FF, transparent)' }} />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-15 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
+    <div style={{ minHeight:'100vh', display:'flex', background:'#080B14', position:'relative', overflow:'hidden' }}>
+      {/* bg orbs */}
+      <div style={{ position:'absolute', top:'-10%', left:'-5%', width:600, height:600, borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 65%)',
+        filter:'blur(60px)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-10%', right:'-5%', width:500, height:500, borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 65%)',
+        filter:'blur(60px)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', top:'40%', right:'20%', width:300, height:300, borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 65%)',
+        filter:'blur(40px)', pointerEvents:'none' }} />
 
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-              <Bot size={20} className="text-white" />
-            </div>
-            <span className="text-white font-bold text-lg font-display tracking-tight">ResolveAI</span>
+      {/* LEFT PANEL */}
+      <div className="hidden lg:flex" style={{ width:'48%', flexDirection:'column', justifyContent:'space-between',
+        padding:'48px', position:'relative' }}>
+        <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
+          <div style={{ width:36, height:36, borderRadius:10,
+            background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+            display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <Bot size={18} color="white" />
           </div>
-        </motion.div>
+          <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:18,
+            color:'white', letterSpacing:'-0.03em' }}>
+            Resolve<span style={{ color:'#A78BFA' }}>AI</span>
+          </span>
+        </Link>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
-            style={{ background: 'rgba(108,99,255,0.2)', border: '1px solid rgba(108,99,255,0.3)' }}>
-            <Sparkles size={13} className="text-violet-400" />
-            <span className="text-xs text-violet-300 font-medium">Powered by Gemini 2.5 Flash</span>
+        <motion.div initial={{ opacity:0, x:-30 }} animate={{ opacity:1, x:0 }} transition={{ delay:.2, duration:.6 }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 14px',
+            borderRadius:99, background:'rgba(108,99,255,0.15)', border:'1px solid rgba(108,99,255,0.3)',
+            fontSize:12, fontWeight:500, color:'#A78BFA', marginBottom:28 }}>
+            ✨ AI-Powered Support Platform
           </div>
-          <h1 className="text-4xl font-bold text-white leading-tight mb-4 font-display">
-            Build AI Support<br />
-            <span style={{ background: 'linear-gradient(135deg, #6C63FF, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Agents in Minutes
-            </span>
+          <h1 style={{ fontSize:'clamp(32px,3.5vw,52px)', fontFamily:"'Plus Jakarta Sans',sans-serif",
+            fontWeight:800, letterSpacing:'-0.04em', lineHeight:1.1, color:'white', marginBottom:18 }}>
+            Build AI Customer<br />Support in Minutes
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-            Upload your documents, configure your AI assistant, and deploy it on your website — no coding required.
+          <p style={{ fontSize:16, color:'rgba(255,255,255,0.5)', lineHeight:1.7, maxWidth:380, marginBottom:36 }}>
+            Upload documents, configure AI, deploy on your website — no coding required.
           </p>
-
-          <div className="mt-8 space-y-3">
-            {[
-              { icon: '📄', text: 'Upload any document format' },
-              { icon: '🤖', text: 'RAG-powered accurate responses' },
-              { icon: '📊', text: 'Real-time analytics & insights' },
-            ].map((item, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
-                className="flex items-center gap-3 text-slate-300 text-sm">
-                <span className="text-base">{item.icon}</span>
-                {item.text}
-              </motion.div>
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+            {['Zero hallucinations — answers from your documents only',
+              'Deploy as embeddable widget in minutes',
+              'Real-time analytics and sentiment analysis'].map((t,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, fontSize:14, color:'rgba(255,255,255,0.65)' }}>
+                <CheckCircle2 size={16} color="#10B981" style={{ flexShrink:0 }} /> {t}
+              </div>
             ))}
           </div>
         </motion.div>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-          className="text-slate-600 text-xs">
-          © 2025 ResolveAI · Built for modern businesses
-        </motion.p>
+        <p style={{ fontSize:12, color:'rgba(255,255,255,0.25)' }}>© 2025 ResolveAI</p>
       </div>
 
-      {/* Right — form panel */}
-      <div className="flex-1 flex items-center justify-center p-6"
-        style={{ background: '#F8FAFC' }}>
-        <motion.div className="w-full max-w-md" variants={container} initial="hidden" animate="show">
-
+      {/* RIGHT PANEL */}
+      <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px' }}>
+        <motion.div variants={stag} initial="hidden" animate="show" style={{ width:'100%', maxWidth:440 }}>
           {/* Mobile logo */}
-          <motion.div variants={fadeUp} className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6C63FF, #7C3AED)' }}>
-              <Bot size={18} className="text-white" />
+          <motion.div variants={fade} className="flex lg:hidden"
+            style={{ display:'flex', alignItems:'center', gap:10, marginBottom:32, justifyContent:'center' }}>
+            <div style={{ width:36, height:36, borderRadius:10,
+              background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
+              display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Bot size={18} color="white" />
             </div>
-            <span className="font-bold text-gray-900 font-display">ResolveAI</span>
+            <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:18, color:'white' }}>
+              Resolve<span style={{ color:'#A78BFA' }}>AI</span>
+            </span>
           </motion.div>
 
-          <motion.div variants={fadeUp}>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1 font-display">Sign in</h2>
-            <p className="text-gray-500 text-sm mb-8">Welcome back to your workspace</p>
+          {/* Glass card */}
+          <motion.div variants={fade}
+            style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(24px)',
+              WebkitBackdropFilter:'blur(24px)', border:'1px solid rgba(255,255,255,0.1)',
+              borderRadius:20, padding:'40px 36px',
+              boxShadow:'0 24px 64px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)' }}>
+
+            <motion.div variants={fade} style={{ marginBottom:28 }}>
+              <h2 style={{ fontSize:24, fontWeight:800, color:'white', marginBottom:6,
+                fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:'-0.03em' }}>Welcome back</h2>
+              <p style={{ fontSize:14, color:'rgba(255,255,255,0.45)' }}>Sign in to your workspace</p>
+            </motion.div>
+
+            <form onSubmit={submit}>
+              <motion.div variants={fade} style={{ marginBottom:16 }}>
+                <label style={{ display:'block', fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.6)',
+                  textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:8 }}>Email</label>
+                <div style={{ position:'relative' }}>
+                  <Mail size={15} color="rgba(255,255,255,0.35)"
+                    style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }} />
+                  <input name="email" type="email" value={form.email} onChange={set} required
+                    placeholder="you@company.com"
+                    style={{ width:'100%', padding:'11px 14px 11px 42px', fontSize:14,
+                      background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.12)',
+                      borderRadius:10, color:'white', outline:'none', transition:'all .2s' }}
+                    onFocus={e=>{ e.target.style.borderColor='rgba(108,99,255,0.6)'; e.target.style.background='rgba(108,99,255,0.08)' }}
+                    onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.12)'; e.target.style.background='rgba(255,255,255,0.06)' }} />
+                </div>
+              </motion.div>
+
+              <motion.div variants={fade} style={{ marginBottom:24 }}>
+                <label style={{ display:'block', fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.6)',
+                  textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:8 }}>Password</label>
+                <div style={{ position:'relative' }}>
+                  <Lock size={15} color="rgba(255,255,255,0.35)"
+                    style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }} />
+                  <input name="password" type={show?'text':'password'} value={form.password} onChange={set} required
+                    placeholder="••••••••"
+                    style={{ width:'100%', padding:'11px 42px 11px 42px', fontSize:14,
+                      background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.12)',
+                      borderRadius:10, color:'white', outline:'none', transition:'all .2s' }}
+                    onFocus={e=>{ e.target.style.borderColor='rgba(108,99,255,0.6)'; e.target.style.background='rgba(108,99,255,0.08)' }}
+                    onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.12)'; e.target.style.background='rgba(255,255,255,0.06)' }} />
+                  <button type="button" onClick={()=>setShow(s=>!s)}
+                    style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)',
+                      background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.4)',
+                      display:'flex', padding:0 }}>
+                    {show ? <EyeOff size={15}/> : <Eye size={15}/>}
+                  </button>
+                </div>
+              </motion.div>
+
+              <motion.button variants={fade} type="submit" disabled={loading}
+                style={{ width:'100%', padding:'12px', fontSize:15, fontWeight:700, color:'white', border:'none',
+                  background:'linear-gradient(135deg,#6C63FF,#7C3AED)', borderRadius:12, cursor:'pointer',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                  boxShadow:'0 8px 24px rgba(108,99,255,0.4)', opacity:loading?.5:1,
+                  transition:'all .2s ease', fontFamily:'inherit' }}>
+                {loading ? 'Signing in…' : <><span>Sign In</span><ArrowRight size={16}/></>}
+              </motion.button>
+            </form>
+
+            <motion.div variants={fade}
+              style={{ marginTop:24, paddingTop:24, borderTop:'1px solid rgba(255,255,255,0.08)',
+                textAlign:'center', fontSize:14, color:'rgba(255,255,255,0.4)' }}>
+              No account?{' '}
+              <Link to="/register" style={{ color:'#A78BFA', fontWeight:600, textDecoration:'none' }}>
+                Create workspace →
+              </Link>
+            </motion.div>
           </motion.div>
 
-          <motion.form variants={fadeUp} onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">Email</label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input name="email" type="email" value={form.email} onChange={handle}
-                  className="input pl-10" placeholder="you@company.com" required />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">Password</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input name="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handle}
-                  className="input pl-10 pr-10" placeholder="••••••••" required />
-                <button type="button" onClick={() => setShowPass(s => !s)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-
-            <motion.button type="submit" disabled={loading}
-              className="btn-primary w-full h-11 mt-2"
-              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-              {loading
-                ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Signing in…</span>
-                : <span className="flex items-center gap-2">Sign In <ArrowRight size={16} /></span>
-              }
-            </motion.button>
-          </motion.form>
-
-          <motion.p variants={fadeUp} className="text-center text-sm text-gray-500 mt-6">
-            No account yet?{' '}
-            <Link to="/register" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
-              Create workspace →
-            </Link>
-          </motion.p>
+          <motion.div variants={fade}
+            style={{ marginTop:20, display:'flex', justifyContent:'center', gap:20 }}>
+            {['Free 14-day trial', 'No credit card', 'Cancel anytime'].map(t => (
+              <span key={t} style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:'rgba(255,255,255,0.3)' }}>
+                <CheckCircle2 size={11} color="#10B981" /> {t}
+              </span>
+            ))}
+          </motion.div>
         </motion.div>
       </div>
     </div>

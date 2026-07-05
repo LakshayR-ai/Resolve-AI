@@ -290,10 +290,12 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop:'1px solid rgba(255,255,255,0.07)', padding:'36px 24px',
+      <footer style={{ borderTop:'1px solid rgba(255,255,255,0.07)', padding:'32px 24px',
         width:'100%', background:'rgba(0,0,0,0.2)' }}>
         <div style={{ maxWidth:1160, margin:'0 auto', display:'flex',
-          justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:16 }}>
+          flexDirection:'column', alignItems:'center', gap:20 }}>
+
+          {/* Logo */}
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <div style={{ width:30, height:30, borderRadius:8,
               background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
@@ -305,15 +307,19 @@ export default function Landing() {
               Resolve<span style={{ color:'#A78BFA' }}>AI</span>
             </span>
           </div>
-          <div style={{ display:'flex', gap:24 }}>
-            {[['Sign In','/login'],['Register','/register'],['Dashboard','/dashboard']].map(([l,u]) => (
-              <Link key={l} to={u} style={{ fontSize:13, color:'rgba(255,255,255,0.38)',
+
+          {/* Links */}
+          <div style={{ display:'flex', alignItems:'center', gap:32 }}>
+            {[['Sign In','/login'],['Register','/register']].map(([l,u]) => (
+              <Link key={l} to={u} style={{ fontSize:13, color:'rgba(255,255,255,0.45)',
                 textDecoration:'none', fontWeight:500, transition:'color .15s' }}
-                onMouseEnter={e=>e.currentTarget.style.color='rgba(255,255,255,0.7)'}
-                onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.38)'}>{l}</Link>
+                onMouseEnter={e=>e.currentTarget.style.color='rgba(255,255,255,0.8)'}
+                onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.45)'}>{l}</Link>
             ))}
           </div>
-          <p style={{ fontSize:13, color:'rgba(255,255,255,0.25)', margin:0 }}>
+
+          {/* Copyright */}
+          <p style={{ fontSize:12, color:'rgba(255,255,255,0.22)', margin:0 }}>
             © 2025 ResolveAI · Free for everyone
           </p>
         </div>

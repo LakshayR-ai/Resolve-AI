@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   MessageSquare, FileText, TrendingUp, ArrowRight, Zap,
   CalendarDays, Calendar, Smile, Database, AlertTriangle,
-  ExternalLink, Users, BarChart3, Clock, CheckCircle2, BookOpen, Activity
+  ExternalLink, Users, BarChart3, Clock, CheckCircle2, Activity
 } from 'lucide-react'
 import Layout from '../components/Layout'
 
@@ -130,30 +130,6 @@ export default function Dashboard() {
           style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:20 }}>
           {METRICS.map(m => <MetricCard key={m.key} m={m} s={s} loading={loading} />)}
         </motion.div>
-
-        {/* Empty KB banner */}
-        {!loading && s?.total_documents===0 && (
-          <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-            style={{ marginBottom:20, padding:'16px 20px', borderRadius:14,
-              display:'flex', alignItems:'center', gap:16,
-              background:'linear-gradient(135deg,rgba(108,99,255,0.07),rgba(124,58,237,0.04))',
-              border:'1px solid rgba(108,99,255,0.18)' }}>
-            <div style={{ width:40, height:40, borderRadius:10, flexShrink:0,
-              background:'rgba(108,99,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <BookOpen size={18} color="#6C63FF" />
-            </div>
-            <div style={{ flex:1 }}>
-              <p style={{ fontSize:14, fontWeight:600, color:'#0F172A', margin:'0 0 2px' }}>Knowledge base is empty</p>
-              <p style={{ fontSize:13, color:'#64748B', margin:0 }}>Upload your first document to start answering customer questions with AI.</p>
-            </div>
-            <Link to="/documents" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'9px 16px',
-              background:'linear-gradient(135deg,#6C63FF,#7C3AED)', color:'white', borderRadius:10,
-              textDecoration:'none', fontSize:13, fontWeight:600, flexShrink:0,
-              boxShadow:'0 4px 12px rgba(108,99,255,0.3)' }}>
-              Upload Documents →
-            </Link>
-          </motion.div>
-        )}
 
         {/* Bottom 3-col */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>

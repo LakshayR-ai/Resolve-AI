@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Bot, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const fade = { hidden:{ opacity:0, y:20 }, show:{ opacity:1, y:0 } }
@@ -165,14 +165,6 @@ export default function Login() {
             </motion.div>
           </motion.div>
 
-          <motion.div variants={fade}
-            style={{ marginTop:20, display:'flex', justifyContent:'center', gap:20 }}>
-            {['Free 14-day trial', 'No credit card', 'Cancel anytime'].map(t => (
-              <span key={t} style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:'rgba(255,255,255,0.3)' }}>
-                <CheckCircle2 size={11} color="#10B981" /> {t}
-              </span>
-            ))}
-          </motion.div>
         </motion.div>
       </div>
     </div>

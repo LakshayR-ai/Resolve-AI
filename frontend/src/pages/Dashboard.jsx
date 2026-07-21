@@ -79,7 +79,7 @@ export default function Dashboard() {
   useEffect(()=>{ api.get('/analytics/').then(r=>setAnalytics(r.data)).catch(()=>{}).finally(()=>setLoading(false)) },[])
   const s = analytics?.summary
   const h = new Date().getHours()
-  const gr = h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening'
+  const gr = h<5?'Good evening':h<12?'Good morning':h<17?'Good afternoon':'Good evening'
   const em = h<12?'🌅':h<17?'☀️':'🌙'
 
   return (

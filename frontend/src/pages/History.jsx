@@ -19,8 +19,36 @@ export default function History() {
   useEffect(()=>{load()},[])
 
   const open=id=>{ setSelected(id);setMsgLoad(true); api.get(`/chat/history/sessions/${id}`).then(r=>setMessages(r.data.messages)).catch(()=>toast.error('Failed')).finally(()=>setMsgLoad(false)) }
-  const doSearch=()=>{ setLoading(true); api.get('/chat/history/search',{ params:{ query:search,sentiment,category,page:1,page_size:PAGE } }).then(r=>{ setSessions([]);setTotal(r.data.total) }).catch(()=>{}).finally(()=>setLoading(false)) }
-  const clear=()=>{ setSearch('');setSentiment('');setCategory('');load() }
+  const doSearch = () => {
+    setLoading(true)
+    api.get('/chat/history/search', { params:{ query:search, sentiment, category, page:1, page_size:PAGE } })
+      .then(r => {
+        setSessions(r.data.messages?.map(m => ({
+          session_id: m.session_id,
+          customer_name: m.customer_name || 'Anonymous',
+          message_count: 1,
+          created_at: m.created_at
+        })) || [])
+        setTotal(r.data.total)
+        setPage(1)
+      })
+      .catch(() => toast.error('Search failed'))
+      .finally(() => setLoading(false))
+  }
+
+  const prevPage = () => {
+    const p = page - 1
+    setPage(p)
+    load(p)
+  }
+
+  const nextPage = () => {
+    const p = page + 1
+    setPage(p)
+    load(p)
+  }
+
+  const clear = () => { setSearch(''); setSentiment(''); setCategory(''); setPage(1); load(1) }
 
   const selInfo = sessions.find(s=>s.session_id===selected)
 
@@ -112,11 +140,11 @@ export default function History() {
           {total>PAGE&&(
             <div style={{ padding:'10px 14px',borderTop:'1px solid rgba(108,99,255,.07)',
               display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-              <button disabled={page<=1} onClick={()=>{ setPage(p=>p-1);load(page-1) }}
+              <button disabled={page<=1} onClick={prevPage}
                 style={{ padding:'5px 10px',borderRadius:7,border:'1px solid #E5E7EB',cursor:'pointer',
                   background:'white',fontSize:12,color:'#374151',fontFamily:'inherit',opacity:page<=1?.4:1 }}>← Prev</button>
               <span style={{ fontSize:12,color:'#94A3B8' }}>{page}/{Math.ceil(total/PAGE)}</span>
-              <button disabled={page>=Math.ceil(total/PAGE)} onClick={()=>{ setPage(p=>p+1);load(page+1) }}
+              <button disabled={page>=Math.ceil(total/PAGE)} onClick={nextPage}
                 style={{ padding:'5px 10px',borderRadius:7,border:'1px solid #E5E7EB',cursor:'pointer',
                   background:'white',fontSize:12,color:'#374151',fontFamily:'inherit',opacity:page>=Math.ceil(total/PAGE)?.4:1 }}>Next →</button>
             </div>

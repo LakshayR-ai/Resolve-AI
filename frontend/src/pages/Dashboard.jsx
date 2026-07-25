@@ -87,9 +87,9 @@ export default function Dashboard() {
       <style>{`@keyframes skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
       {/* Topbar */}
-      <div style={{ background:'rgba(255,255,255,0.92)', backdropFilter:'blur(16px)',
-        borderBottom:'1px solid rgba(108,99,255,0.08)',
-        boxShadow:'0 1px 12px rgba(108,99,255,0.05)', padding:'18px 28px' }}>
+      <div style={{ background:'rgba(255,255,255,0.96)', backdropFilter:'blur(20px)',
+        borderBottom:'1px solid rgba(99,102,241,0.1)',
+        boxShadow:'0 1px 16px rgba(99,102,241,0.07)', padding:'18px 28px' }}>
         <div style={{ maxWidth:1280, margin:'0 auto', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
           <div>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:4 }}>
@@ -124,7 +124,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ padding:'24px 28px', maxWidth:1280, margin:'0 auto' }}>
+      <div style={{ padding:'24px 28px', maxWidth:1280, margin:'0 auto', background:'var(--bg-page)' }}>
         {/* Metrics */}
         <motion.div variants={stagger} initial="hidden" animate="show"
           style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:20 }}>

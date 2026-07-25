@@ -216,7 +216,7 @@ export default function Chat() {
 
         {/* Messages */}
         <div style={{ flex:1, overflowY:'auto', padding:'24px',
-          background:'linear-gradient(180deg,#F8FAFC 0%,#F1F5FF 100%)' }}>
+          background:'var(--bg-page)' }}>
           <AnimatePresence>
             {messages.length===0 && (
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
@@ -278,7 +278,7 @@ export default function Chat() {
                   background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
                   display:'flex',alignItems:'center',justifyContent:'center',
                   boxShadow:'0 4px 12px rgba(108,99,255,.35)',
-                  opacity:(loading||!input.trim())?.4:1, flexShrink:0 }}>
+                  opacity: (loading || !input.trim()) ? 0.4 : 1, flexShrink:0 }}>
                 {loading
                   ? <div style={{ width:14,height:14,borderRadius:'50%',
                       border:'2px solid rgba(255,255,255,.4)',borderTopColor:'white',

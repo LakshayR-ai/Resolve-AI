@@ -29,6 +29,15 @@ export default function App() {
                 fontSize: '13px',
                 fontWeight: '500',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                background: 'white',
+                color: '#0F172A',
+                border: '1px solid rgba(99,102,241,0.12)',
+              },
+              success: {
+                iconTheme: { primary: '#10B981', secondary: 'white' },
+              },
+              error: {
+                iconTheme: { primary: '#F43F5E', secondary: 'white' },
               },
             }}
           />

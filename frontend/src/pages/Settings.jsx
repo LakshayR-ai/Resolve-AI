@@ -190,9 +190,9 @@ export default function Settings() {
               <div>
                 <p style={{ fontSize:11,fontWeight:600,color:'#64748B',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8 }}>Direct Chat URL</p>
                 <div style={{ display:'flex',gap:8 }}>
-                  <input value={`http://localhost:3000/chat/${embedConfig.slug}`} readOnly
+                  <input value={`${window.location.origin}/chat/${embedConfig.slug}`} readOnly
                     style={{ ...IS,fontFamily:'monospace',fontSize:13,flex:1 }}/>
-                  <button onClick={()=>copyText(`http://localhost:3000/chat/${embedConfig.slug}`)}
+                  <button onClick={()=>copyText(`${window.location.origin}/chat/${embedConfig.slug}`)}
                     style={{ padding:'10px 14px',borderRadius:10,border:'1px solid #E5E7EB',
                       background:'white',cursor:'pointer',display:'flex',alignItems:'center',
                       color:'#64748B',transition:'all .15s',fontFamily:'inherit' }}>

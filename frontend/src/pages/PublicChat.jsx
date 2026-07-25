@@ -295,7 +295,7 @@ export default function PublicChat() {
                 background:'linear-gradient(135deg,#6C63FF,#7C3AED)',
                 display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
                 boxShadow:'0 3px 10px rgba(108,99,255,.35)',
-                opacity:(loading||!input.trim())?.4:1,transition:'opacity .15s' }}>
+                opacity: (loading || !input.trim()) ? 0.4 : 1, transition:'opacity .15s' }}>
               {loading ? <Loader2 size={14} color="white" style={{ animation:'spin 1s linear infinite' }}/> : <Send size={14} color="white"/>}
             </button>
           </form>

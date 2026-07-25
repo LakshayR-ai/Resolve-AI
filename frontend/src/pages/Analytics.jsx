@@ -64,9 +64,9 @@ export default function Analytics() {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
       {/* Topbar */}
-      <div style={{ background:'rgba(255,255,255,.92)',backdropFilter:'blur(16px)',
-        borderBottom:'1px solid rgba(108,99,255,.08)',boxShadow:'0 1px 8px rgba(108,99,255,.05)',
-        padding:'18px 28px' }}>
+      <div style={{ background:'rgba(255,255,255,0.96)', backdropFilter:'blur(20px)',
+        borderBottom:'1px solid rgba(99,102,241,0.1)',
+        boxShadow:'0 1px 16px rgba(99,102,241,0.07)', padding:'18px 28px' }}>
         <div style={{ maxWidth:1280,margin:'0 auto',display:'flex',justifyContent:'space-between',alignItems:'center' }}>
           <div>
             <h1 style={{ fontSize:20,fontWeight:700,color:'#0F172A',margin:'0 0 3px',

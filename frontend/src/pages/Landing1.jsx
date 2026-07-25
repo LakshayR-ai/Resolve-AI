@@ -66,6 +66,13 @@ export default function Landing() {
       transition:'background .35s ease, color .35s ease'
     }}>
 
+      {/* Page-wide wavy pattern — flowing lines behind everything, tinted per theme */}
+      <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none',
+        backgroundImage:`url("data:image/svg+xml,${encodeURIComponent(
+          `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='60'><path d='M0 30 Q 22.5 8 45 30 T 90 30 T 135 30 T 180 30' fill='none' stroke='${t.gridLine}' stroke-width='1.4'/></svg>`
+        )}")`,
+        backgroundSize:'180px 60px' }} />
+
       {/* ── NAVBAR ── */}
       <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100,
         background:t.navBg, backdropFilter:'blur(20px)',

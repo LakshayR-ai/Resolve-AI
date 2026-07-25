@@ -31,14 +31,13 @@ export default function Sidebar() {
     <motion.aside
       animate={{ width: W }}
       transition={{ duration:.25, ease:[.4,0,.2,1] }}
-      style={{ width:W, flexShrink:0, background:'#0B0F1A',
-        borderRight:'1px solid rgba(255,255,255,0.06)',
+      style={{ width:W, flexShrink:0, background:'var(--bg-sidebar)',
+        borderRight:'1px solid rgba(255,255,255,0.07)',
         display:'flex', flexDirection:'column', height:'100vh',
         position:'sticky', top:0, zIndex:50, overflow:'hidden' }}>
 
-      {/* ambient */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:200, pointerEvents:'none',
-        background:'radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.18) 0%, transparent 70%)' }} />
+        background:'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.18) 0%, transparent 70%)' }} />
 
       {/* BRAND */}
       <div style={{ padding:'20px 14px 16px', position:'relative', flexShrink:0,
@@ -76,7 +75,10 @@ export default function Sidebar() {
           style={{ position:'absolute', right:-1, top:'50%', transform:'translateY(-50%)',
             width:20, height:20, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.12)',
             background:'#1a1f32', display:'flex', alignItems:'center', justifyContent:'center',
-            cursor:'pointer', color:'rgba(255,255,255,0.5)', zIndex:10, padding:0 }}>
+            cursor:'pointer', color:'rgba(255,255,255,0.5)', zIndex:10, padding:0,
+            transition:'background .15s, color .15s' }}
+          onMouseEnter={e=>{ e.currentTarget.style.background='rgba(99,102,241,0.3)'; e.currentTarget.style.color='white' }}
+          onMouseLeave={e=>{ e.currentTarget.style.background='#1a1f32'; e.currentTarget.style.color='rgba(255,255,255,0.5)' }}>
           {collapsed ? <ChevronRight size={12}/> : <ChevronLeft size={12}/>}
         </button>
       </div>

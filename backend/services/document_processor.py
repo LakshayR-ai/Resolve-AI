@@ -111,7 +111,7 @@ def _ocr_pdf(pdf_path: str) -> str:
     if POPPLER_PATH:
         convert_kwargs["poppler_path"] = POPPLER_PATH
 
-    logger.info("OCR: converting PDF to images → %s", pdf_path)
+    logger.info("OCR: converting PDF to images -> %s", pdf_path)
     try:
         images = convert_from_path(**convert_kwargs)
     except Exception as exc:
@@ -169,14 +169,14 @@ def extract_text(pdf_path: str) -> str:
             char_count, os.path.basename(pdf_path),
         )
     except Exception as exc:
-        logger.warning("pdfplumber error on '%s': %s – falling back to OCR", pdf_path, exc)
+        logger.warning("pdfplumber error on '%s': %s - falling back to OCR", pdf_path, exc)
         text = ""
         char_count = 0
 
     # ── Step 2: OCR fallback ────────────────────────────────────────────────
     if char_count < MIN_TEXT_CHARS:
         logger.info(
-            "Text too short (%d < %d chars) – triggering OCR for '%s'",
+            "Text too short (%d < %d chars) - triggering OCR for '%s'",
             char_count, MIN_TEXT_CHARS, os.path.basename(pdf_path),
         )
         text = _ocr_pdf(pdf_path)

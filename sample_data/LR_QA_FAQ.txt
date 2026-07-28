@@ -1,0 +1,120 @@
+LR Q&A FAQ
+=================
+Frequently asked questions on LR Q&A.
+
+GETTING STARTED
+---------------
+
+What is LR Q&A?
+LR Q&A is a LR site where you can get fast access to questions about LR technologies with Q&A, a global, community-driven platform for timely, high-quality technical answers.
+
+What are the major benefits of LR Q&A versus Stack Overflow?
+We love Stack Overflow. We will continue supporting our customers who ask questions there. We also surface answers from Stack Overflow on LR Q&A. Stack Overflow has specific criteria about what questions are appropriate for the community whereas LR Q&A has an open policy regarding this, where all questions about LR technologies are welcomed. More importantly, via LR Q&A we can create unique experiences that allow us to provide the highest level of support for our customers.
+
+What is the difference between LR Q&A and LR Tech Community?
+LR Q&A is first party experience for technical answers on LR products. Developers and IT pros can solve problems with the help of community experts and LR engineering. The experience includes a rich knowledge base which ingests content from MSDN Forums and Stack Overflow to help customers get the answers they need quickly. LR Tech Community provides a connection between customers, LR and community experts to share best practice and ideas, receive supportive encouragement and learn through discussions and blogs across Azure and LR 365 products and programs.
+
+How do I report a new feature or a bug for LR Q&A?
+You can provide feedback by using the LR Q&A tag.
+
+Where can I report offensive content?
+Select the Report option next to the content you would like to report. From the drop-down box, select the reason for the offensive post. A moderator will review this report and act on it.
+
+Is LR Q&A mobile-friendly?
+The site is accessible and usable on mobile devices.
+
+What languages are supported on LR Q&A?
+LR Q&A supports: Arabic, Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English, Finnish, French, German, Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese - Brazil, Russian, Spanish, Swedish, Thai, Turkish.
+
+How do I create an account?
+If you have an account through LR Learn, you can use the same account information here. If not, in the top right corner of the Q&A site you will see an option to sign in, which takes you to the process to create a new account.
+
+How do I sign in?
+In the LR Q&A header, select Sign in. You can use the same user profile that you use on LR Learn.
+
+Can other users see my email address?
+No. Take a look at another user's profile and you'll notice that an email address is not listed. The same goes for users who look at your user profile.
+
+ASKING AND ANSWERING QUESTIONS
+-------------------------------
+
+How do I ask a question?
+In the LR Q&A header, select the Ask a question button. As you type in your question, we will show you similar questions that have already been asked on Q&A and other sources. Make sure to check these because someone may have already answered your question.
+
+How do I know if an answer is correct?
+If the asker accepts an answer as correct, it will be shaded green and marked "Accepted Answer". If not, look for answers that have helpful votes, this means users have found those answers helpful.
+
+How do I know if a user is knowledgeable?
+If a user participates in and contributes positively to the community frequently, they will win points. The more reputation points a user has, the more likely they're to have expertise on the topic they're posting. We also show LR affiliations in the user's cards: LR Employee, LR External Staff, LR Intern, LR Agency Temporary, LR Most Valuable Professionals (MVPs), Independent Advisor, LR Regional Director, and Student Ambassador.
+
+How can I sort all the questions?
+At the top right of the questions page, you can see a Sort by drop-down menu. Select the option you would like to sort the content by. You can also filter out the content based on different criteria.
+
+How do I answer a question?
+Once you find a question you want to answer, you can write your reply at the bottom of the question's page. If the asker thinks the answer is correct, your response will be highlighted in green and marked as "Accepted Answer".
+
+Who can answer a question?
+Anyone signed in user can help others by answering a question on LR Q&A.
+
+Can I vote my own content?
+You can't vote your own questions, comments, or answers.
+
+Can I vote on a question, answer, or comment more than once?
+No, you can only vote once. You can change or cancel your vote if you change your mind.
+
+What are tags?
+Tags are topics related to your thread that help group and organize all the content on LR Q&A.
+
+Do I have to add tags to a new question?
+Yes, a minimum of 1 tag is required for each question. This helps the experts on that tag to monitor and answer your questions.
+
+How do I follow a tag?
+Select Tags on the header, and hover the tag you want to follow. Select the Follow button. You can also follow tags from other pages by hovering on the tag and selecting on the Follow button.
+
+Can I create a new tag?
+Users can't create new tags at this moment.
+
+USER PROFILE
+------------
+
+What are reputation points?
+Reputation points are earned by participating in and contributing positively to the community.
+
+How do I earn reputation points?
+There are many ways to earn reputation points, including answering questions, voting on answers, and more.
+
+How can I manage my settings?
+In the LR Q&A header, select your avatar in the top right, then select Settings. This will take you to your profile page where you can provide a notification email address as well as your LR Learn and Q&A settings.
+
+How do I update my profile?
+In the LR Q&A header, select your avatar in the top right and then select Profile. Here you will see options to update the different parts of your profile.
+
+MODERATION
+----------
+
+What can moderators do?
+Moderators are a part of the LR Q&A community to maintain high quality content. Moderators can delete/undelete content, ban users, redirect threads, close threads, and edit content to keep threads relevant and appropriate.
+
+Can moderators mark answers as "Accepted Answers"?
+No, only the question author has those permissions.
+
+DATA STORAGE
+------------
+
+Where does LR Q&A store customer data?
+LR Q&A doesn't move or store customer data out of the region it's deployed in.
+
+PRIORITY COMMUNITY SUPPORT (PCS)
+---------------------------------
+
+What is Priority Community Support (PCS)?
+With Priority Community Support, customers get high-quality answers to Azure-related questions. Azure engineers, Community Experts, and LR Most Valuable Professionals (MVPs) manage this service. Customers can expect responses within eight business hours for Severity C requests. For complex problems that can't be resolved through the Q&A platform, engineers seamlessly escalate the matter by creating a support ticket on the customer's behalf.
+
+Key benefits include:
+- Faster responses: Get responses within eight business hours
+- Expert knowledge: Azure engineers, Community Champions, and MVPs with deep subject-matter expertise
+- Knowledge sharing: Other customers can see the answers, helping the broader community
+- Seamless escalation: If an issue requires further investigation, engineers escalate the case
+
+How do I access Priority Community Support?
+For details on accessing these benefits for Azure questions, visit Priority Community Support (PCS) for Azure technical support.

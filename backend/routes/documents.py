@@ -132,6 +132,22 @@ def delete_document(
     return None
 
 
+@router.get("/{doc_id}/status")
+def get_document_status(
+    doc_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Lightweight endpoint — returns only status + chunk_count for polling."""
+    doc = db.query(models.Document).filter(
+        models.Document.id == doc_id,
+        models.Document.company_id == current_user.company_id,
+    ).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return {"id": doc.id, "status": doc.status, "chunk_count": doc.chunk_count or 0}
+
+
 @router.get("/{doc_id}", response_model=DocumentResponse)
 def get_document(
     doc_id: int,
